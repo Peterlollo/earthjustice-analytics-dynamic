@@ -31,7 +31,6 @@ html, body {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
   display: flex;
   flex-direction: column;
@@ -39,7 +38,6 @@ html, body {
   background: ;
   color: #484848;
   min-height: 100vh;
-  text-align: center;
 }
 #app > #header {
   background-color: #38424A;

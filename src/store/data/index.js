@@ -1,4 +1,5 @@
 import {
+  FETCHING_DATA,
   GET_DATA_SUCCESS,
   GET_DATA_FAILURE,
   VIEW_PROVIDER,
@@ -11,33 +12,37 @@ import {
 } from './types'
 
 const state = {
-  error: null,
-  isViewingProvider: null,
-  isViewingPage: {
-    id: null,
-    path: null
-  },
-  filters: [],
-  providers: [],
-  pages: [],
-  sessions: [],
-  pageviews: [],
+  error: false,
+  // isViewingProvider: null,
+  // isViewingPage: {
+  //   id: null,
+  //   path: null
+  // },
+  fetchingData: false,
+  providers: {},
+  pages: {},
   pagePathFromParam: null,
   pagePathFromParamStatus: null,
+  pageFoundInStore: false,
   whitelistSectors: []
 }
 
 const mutations = {
 
+  [FETCHING_DATA] (state, boolean) {
+    state.fetchingData = boolean
+  },
+
   [GET_DATA_SUCCESS] (state, { providers, pages, sessions, pageviews }) {
-    state.providers = state.providers.concat(providers)
-    state.pages = state.pages.concat(pages)
-    state.sessions = state.sessions.concat(sessions)
-    state.pageviews = state.pageviews.concat(pageviews)
+    state.error = false
+    state.providers = providers
+    state.pages = pages
+    state.fetchingData = false
   },
 
   [GET_DATA_FAILURE] (state, error) {
-    state.error = error
+    state.error = true
+    state.fetchingData = false
   },
 
   [VIEW_PROVIDER] (state, providerID) {
@@ -47,7 +52,8 @@ const mutations = {
   [GET_PAGE_PATH_FROM_PARAM_SUCCESS] (state, path) {
     state.pagePathFromParam = path
     state.pagePathFromParamStatus = 'success'
-    state.isViewingPage = state.pages.filter((p) => p.path === path)[0]
+    state.pageFoundInStore = state.pages.hasOwnProperty(path)
+    // state.isViewingPage = state.pages.filter((p) => p.path === path)[0]
   },
 
   [GET_PAGE_PATH_FROM_PARAM_FAILURE] (state, path) {

@@ -1,4 +1,5 @@
 import {
+  FETCHING_DATA,
   GET_DATA_SUCCESS,
   GET_DATA_FAILURE,
   VIEW_PROVIDER,
@@ -12,11 +13,12 @@ import {
 import axios from 'axios'
 
 export const getDataDynamic = ({commit, dispatch}) => {
+  commit(FETCHING_DATA, true)
   axios.get(`${process.env.API_BASE_URL}/api/dataDynamic`)
     .then(response => {
       console.log('Response: ', response.data)
       commit(GET_DATA_SUCCESS, response.data)
-      dispatch('getPagePathFromParam')
+      dispatch('getPagePathFromParam2')
     })
     .catch(e => {
       console.log('Error: ', e)
@@ -29,7 +31,7 @@ export const getData = ({commit, dispatch}) => {
     .then(response => {
       console.log('Response: ', response.data)
       commit(GET_DATA_SUCCESS, response.data)
-      dispatch('getPagePathFromParam')
+      // dispatch('getPagePathFromParam')
     })
     .catch(e => {
       console.log('Error: ', e)
@@ -53,17 +55,25 @@ export const viewProvider = ({commit}, providerID) => {
   commit(VIEW_PROVIDER, providerID)
 }
 
-export const getPagePathFromParam = ({commit, state}) => {
+// export const getPagePathFromParam = ({commit, state}) => {
+//   let parsedUrl = new URL(window.location.href)
+//   let path = parsedUrl.searchParams.get('path')
+//   let page = state.data.pages.filter((p) => p.path === path)[0]
+//   if (page) {
+//     commit(GET_PAGE_PATH_FROM_PARAM_SUCCESS, path)
+//   } else {
+//     commit(GET_PAGE_PATH_FROM_PARAM_FAILURE, path)
+//   }
+// }
+export const getPagePathFromParam2 = ({commit, state, dispatch}) => {
   let parsedUrl = new URL(window.location.href)
   let path = parsedUrl.searchParams.get('path')
-  let page = state.data.pages.filter((p) => p.path === path)[0]
-  if (page) {
+  if (path) {
     commit(GET_PAGE_PATH_FROM_PARAM_SUCCESS, path)
   } else {
     commit(GET_PAGE_PATH_FROM_PARAM_FAILURE, path)
   }
 }
-
 export const whitelistAddOrRemoveProvider = ({commit, dispatch}, {action, id}) => {
   axios.post(`${process.env.API_BASE_URL}/api/providers/changeWhitelist`, {action, id})
     .then(response => {

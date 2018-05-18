@@ -16,7 +16,6 @@ const storeReportDataDynamic = helpers.storeReportDataDynamic
 
 module.exports = {
   getAnalyticsDataDynamic: function (req, res, next) {
-    // const request = helpers.initRequestDynamic()
     const jwtClient = new google.auth.JWT(
       key.client_email,
       null,

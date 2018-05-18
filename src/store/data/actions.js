@@ -11,6 +11,19 @@ import {
 } from './types'
 import axios from 'axios'
 
+export const getDataDynamic = ({commit, dispatch}) => {
+  axios.get(`${process.env.API_BASE_URL}/api/dataDynamic`)
+    .then(response => {
+      console.log('Response: ', response.data)
+      commit(GET_DATA_SUCCESS, response.data)
+      dispatch('getPagePathFromParam')
+    })
+    .catch(e => {
+      console.log('Error: ', e)
+      commit(GET_DATA_FAILURE, e)
+    })
+}
+
 export const getData = ({commit, dispatch}) => {
   axios.get(`${process.env.API_BASE_URL}/api/data`)
     .then(response => {

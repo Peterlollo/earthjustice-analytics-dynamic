@@ -17,6 +17,9 @@ if (env === 'dev') {
 const request = helpers.initRequest()
 const makeReportRequest = helpers.makeReportRequest
 const storeReportData = helpers.storeReportData
+const requestDynamic = helpers.initRequestDynamic()
+const makeReportRequestDynamic = helpers.makeReportRequestDynamic
+const storeReportDataDynamic = helpers.storeReportDataDynamic
 
 module.exports = {
   getAnalyticsData: function (req, res, next) {
@@ -29,6 +32,21 @@ module.exports = {
     )
     // initialize first report request with pageToken set to '0'
     makeReportRequest(jwtClient, request, storeReportData, '0', next)
+  },
+  getAnalyticsDataDynamic: function (req, res, next) {
+    // const request = helpers.initRequestDynamic()
+    const jwtClient = new google.auth.JWT(
+      key.client_email,
+      null,
+      key.private_key,
+      ['https://www.googleapis.com/auth/analytics.readonly'], // an array of auth scopes
+      null
+    )
+    // initialize first report request with pageToken set to '0'
+    makeReportRequestDynamic(jwtClient, requestDynamic, storeReportDataDynamic, '0', res, next)
+  },
+  sendDataDynamic: function (req, res, next) {
+    res.send(res.locals.totalReportDataDynamic)
   },
   sendData: function (req, res, next) {
     Provider.findAll().then((providers) => {

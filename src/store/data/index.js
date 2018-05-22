@@ -11,6 +11,8 @@ import {
   WHITELIST_CHANGE_PROVIDER_SECTOR_FAILURE
 } from './types'
 
+import { whitelist } from './whitelist'
+
 const state = {
   error: false,
   // isViewingProvider: null,
@@ -23,8 +25,10 @@ const state = {
   pages: {},
   pagePathFromParam: null,
   pagePathFromParamStatus: null,
+  page: {},
   pageFoundInStore: false,
-  whitelistSectors: []
+  whitelistSectors: [],
+  whitelist: whitelist
 }
 
 const mutations = {
@@ -52,7 +56,9 @@ const mutations = {
   [GET_PAGE_PATH_FROM_PARAM_SUCCESS] (state, path) {
     state.pagePathFromParam = path
     state.pagePathFromParamStatus = 'success'
-    state.pageFoundInStore = state.pages.hasOwnProperty(path)
+    let pathWithSlash = `${path}/`
+    state.pageFoundInStore = state.pages.hasOwnProperty(path) || state.pages.hasOwnProperty(pathWithSlash)
+    state.page = state.pages[path] || state.pages[pathWithSlash] || {}
     // state.isViewingPage = state.pages.filter((p) => p.path === path)[0]
   },
 

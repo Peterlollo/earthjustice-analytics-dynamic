@@ -1,4 +1,5 @@
-{
+/* eslint-disable */
+export const whitelist = {
   "department of veterans affairs": {
     "sector": "Federal Government"
   },

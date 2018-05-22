@@ -12,9 +12,10 @@ import {
 } from './types'
 import axios from 'axios'
 
-export const getDataDynamic = ({commit, dispatch}) => {
+export const getDataDynamic = ({commit, dispatch}, path) => {
   commit(FETCHING_DATA, true)
-  axios.get(`${process.env.API_BASE_URL}/api/dataDynamic`)
+  console.log('path in get req: ', path)
+  axios.get(`${process.env.API_BASE_URL}/api/dataDynamic`, {params: {path}})
     .then(response => {
       console.log('Response: ', response.data)
       commit(GET_DATA_SUCCESS, response.data)

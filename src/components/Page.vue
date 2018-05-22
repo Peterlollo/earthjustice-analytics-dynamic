@@ -1,27 +1,34 @@
 <template>
   <div>
+
     <div v-if='fetchingData'>
       <h1>Fetching data...</h1>
     </div>
+
     <div v-else-if='error'>
       <h1>Sorry, there was an error retrieving data from server</h1>
       <p>Please try again</p>
-      <button>Fetch Data</button>
+      <button v-on:click='getDataDynamic'>Fetch Data</button>
     </div>
+
     <div v-else-if='pagePathFromParamStatus === "success" && !pageFoundInStore'>
       <h1>Sorry, could not find that page path</h1>
-      <p>You can try editing the URL in your browser's address bar to search for a new path. Sometimes the "path" parameter requires a '/' at the end. For example:
-        <a>http://ej-analytics-prototype.herokuapp.com/pages?path=earthjustice.org/</a>
-      </p>
+      <p>{{ pathMsgError }}<a>{{ pathMsgErrorLink }}</a></p>
       <p>Or, try fetching the Google Analytics data</p>
-      <button>Fetch Data</button>
+      <button v-on:click='getDataDynamic'>Fetch Data</button>
     </div>
-    <div v-else-if='pagePathFromParamStatus === "success"'>
+
+    <div v-else-if='pagePathFromParamStatus === "success" && pageFoundInStore'>
       <h3>Page</h3>
       <h1>{{pagePathFromParam}}</h1>
-      <h2>Sectors</h2>
-      <h2>Pages</h2>
-      {{ pages }}
+      <h2>Key Sectors</h2>
+      {{ keySectors }}
+      <h2>Key Providers</h2>
+      {{ keyProviders }}
+      <h2>All Providers</h2>
+      {{ allProviders }}
+      <h2>Page</h2>
+      {{ page }}
       <!-- <h1 class='visitors'>Important Visitors: {{ currentPageWithTimesKeyProviders.length }}</h1>
       <ul>
         <li v-for='providerTime in currentPageWithTimesKeyProviders' v-bind:key='providerTime[0]'>
@@ -42,6 +49,7 @@
     </div>
     <div v-else-if='pagePathFromParamStatus === "fail"'>
       <h1>Something's wrong with the URL's "path" parameter</h1>
+      <p>{{ pathMsgError }}<a>{{ pathMsgErrorLink }}</a></p>
     </div>
   </div>
 </template>
@@ -49,8 +57,30 @@
 <script>
 import { mapGetters, mapActions } from 'vuex'
 export default {
+  data: () => {
+    return {
+      pathMsgError: 'Try editing the URL in your browser\'s address bar to search for a new path. Sometimes the "path" parameter requires a "/" at the end. For example:',
+      pathMsgErrorLink: 'http://ej-analytics-prototype.herokuapp.com/pages?path=earthjustice.org/'
+    }
+  },
   name: 'Page',
   computed: {
+    allProviders () {
+      return Object.keys(this.page)
+    },
+    keyProviders () {
+      return this.allProviders.filter((p) => this.whitelist[p])
+    },
+    keySectors () {
+      var uniqueSectors = []
+      this.keyProviders.map((kp) => {
+        let sector = this.whitelist[kp].sector
+        if (uniqueSectors.indexOf(sector) === -1) {
+          uniqueSectors.push(sector)
+        }
+      })
+      return uniqueSectors
+    },
     ...mapGetters([
       'providers',
       'isViewingPage',
@@ -64,7 +94,9 @@ export default {
       'currentPageWithTimesNotKeyProviders',
       'fetchingData',
       'pageFoundInStore',
-      'error'
+      'error',
+      'page',
+      'whitelist'
     ])
   },
   methods: {
@@ -84,7 +116,9 @@ export default {
   },
   created () {
     if (!Object.keys(this.pages).length) { // no page data in store
-      this.getDataDynamic()
+      let parsedUrl = new URL(window.location.href)
+      let path = parsedUrl.searchParams.get('path')
+      this.getDataDynamic(path)
     } else {
       this.getPagePathFromParam2()
     }

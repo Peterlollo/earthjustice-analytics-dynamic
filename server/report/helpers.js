@@ -3,38 +3,31 @@ const analytics = google.analyticsreporting('v4')
 
 const totalReportDataDynamic = {
   providers: {
-    // keys are provider names
-    // each provider name stored only once
-    // value is an object that shows pages visited
-    // so value is an array of strings that represent path names [ 'path1', 'path2', etc.]
-    // thus, on front end, we can see which pages a given provider visited
-    // then can find those pages in the "pages" object below, find the provider, and find the time on page
+    // 'united states senate': [
+    // 'earthjustice.org/',
+    // 'earthjustice.org/about/staff'
+    // ]
+    // (keys are provider names and each provider name is stored only once;
+    // values is an array of strings representing pages visited)
   },
   pages: {
-    // keys are path names
-    // so each path name is only stored once
-    // value is an object with { providerName: cumulativeTimeOnPage }
-    // cumulativeTimeOnPage could either be one number, or an array of "visits" that are just #of seconds
-    // array of visits looks like [5, 247, 3, etc...]
-    // <path name>: <id>
-  },
-  filters: {
-    // TODO: erase this b/c not currently being used in application
-    // first must remove all references from front end app code
-  },
-  sessions: {
-    // TODO: erase this b/c not currently being used in application
-    // first must remove all references from front end app code
-  },
-  pageviews: {
-    // TODO: erase this b/c not currently being used in application
-    // first must remove all references from front end app code
+    // 'earthjustice.org/': {
+    // 'united states senate': [5, 247, 3],
+    // 'amazon': [33]
+    // (keys are path names and each path name is only stored once;
+    // values are objects with { providerName: [time on page per session/visit] };
+    // time on page per session is an array of "visits" represented by # of seconds per visit)
   }
 }
-
 module.exports = {
   // recursively generate report requests until pageToken === undefined
   makeReportRequestDynamic: function (jwtClient, request, storeReportDataDynamic, pageToken, res, next) {
+    if (pageToken === '0') {
+      // on first request, empty report data object of old report data
+      totalReportDataDynamic.providers = {}
+      totalReportDataDynamic.pages = {}
+    }
+
     if (pageToken) {
       request.reportRequests[0].pageToken = pageToken
       module.exports.authorizeDynamic(jwtClient, request, storeReportDataDynamic, res, next)
@@ -61,8 +54,9 @@ module.exports = {
     })
   },
   // create initial request body
-  initRequestDynamic: function () {
+  initRequestDynamic: function (path) {
     // TODO: filter this request by input ga:pagePath
+    console.log('path in initRequestDynamic>>>>>>>>>>> ', path)
     const viewID = '13972743' // Google Analytics view ID
     const request = {
       reportRequests: [
@@ -102,6 +96,15 @@ module.exports = {
                   'expressions': '(not set|customer|internet|broadband|isp|cable com|network|tele|dsl|subscriber|pool|telecom|cable|addresses|telefonica|routed|leased line|communication|comcast|verizon|road runner|service provider|unknown|provider|t-mobile|wifi|telkom|sprint|at-t|residential|province|vodafone|clients|china|dial-up|netblock|wimax|wireless|elisa|sonera|dna oy|at&t|assigned|sl-cgn|block|consumers|kpn|telia|bredband|google|hosting|zscaler|city of|tdc|hubspot)'
                 }
               ]
+            },
+            {
+              'filters': [
+                {
+                  'dimensionName': 'ga:pagePath',
+                  'operator': 'IN_LIST',
+                  'expressions': [path, `${path}/`]
+                }
+              ]
             }
           ]
         }
@@ -122,20 +125,22 @@ module.exports = {
     const rows = report.data.rows
 
     // add report data to DB
-    for (let i = 0; i < rows.length; i++) {
-      const rowDimensions = rows[i].dimensions
-      const provider = rowDimensions[providerIndex]
-      const path = rowDimensions[pathIndex]
-      const rowMetrics = rows[i].metrics[0].values
-      const timeOnPage = Number(rowMetrics[timeOnPageIndex])
+    if(rows) {
+      for (let i = 0; i < rows.length; i++) {
+        const rowDimensions = rows[i].dimensions
+        const provider = rowDimensions[providerIndex]
+        const path = rowDimensions[pathIndex]
+        const rowMetrics = rows[i].metrics[0].values
+        const timeOnPage = Number(rowMetrics[timeOnPageIndex])
 
-      // add Provider
-      totalReportDataDynamic.providers[provider] = totalReportDataDynamic.providers[provider] || []
-      totalReportDataDynamic.providers[provider] = totalReportDataDynamic.providers[provider].concat(path)
-      // add Page
-      totalReportDataDynamic.pages[path] = totalReportDataDynamic.pages[path] || {}
-      totalReportDataDynamic.pages[path][provider] = totalReportDataDynamic.pages[path][provider] || []
-      totalReportDataDynamic.pages[path][provider] = totalReportDataDynamic.pages[path][provider].concat(timeOnPage)
+        // add Provider
+        totalReportDataDynamic.providers[provider] = totalReportDataDynamic.providers[provider] || []
+        totalReportDataDynamic.providers[provider] = totalReportDataDynamic.providers[provider].concat(path)
+        // add Page
+        totalReportDataDynamic.pages[path] = totalReportDataDynamic.pages[path] || {}
+        totalReportDataDynamic.pages[path][provider] = totalReportDataDynamic.pages[path][provider] || []
+        totalReportDataDynamic.pages[path][provider] = totalReportDataDynamic.pages[path][provider].concat(timeOnPage)
+      }
     }
     res.locals.totalReportDataDynamic = totalReportDataDynamic
   }

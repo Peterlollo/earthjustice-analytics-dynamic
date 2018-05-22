@@ -1,4 +1,5 @@
 export const providers = state => state.data.providers
+export const page = state => state.data.page
 export const pages = state => state.data.pages
 export const pageviews = state => state.data.pageviews
 export const pagePathFromParam = state => state.data.pagePathFromParam
@@ -6,6 +7,7 @@ export const pagePathFromParamStatus = state => state.data.pagePathFromParamStat
 export const fetchingData = state => state.data.fetchingData
 export const pageFoundInStore = state => state.data.pageFoundInStore
 export const error = state => state.data.error
+export const whitelist = state => state.data.whitelist
 // export const isViewingProvider = state => {
 //   let providerID = state.data.isViewingProvider
 //   if (!providerID) {

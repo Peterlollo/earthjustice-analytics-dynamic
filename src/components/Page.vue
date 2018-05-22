@@ -19,39 +19,36 @@
     </div>
 
     <div v-else-if='pagePathFromParamStatus === "success" && pageFoundInStore'>
-      <h3>Page</h3>
-      <h1>{{pagePathFromParam}}</h1>
-      <h2>Key Sectors</h2>
-      {{ keySectors }}
-      <h2>Key Providers</h2>
-      {{ keyProviders }}
-      <h2>All Providers</h2>
-      {{ allProviders }}
       <h2>Page</h2>
-      {{ page }}
-      <!-- <h1 class='visitors'>Important Visitors: {{ currentPageWithTimesKeyProviders.length }}</h1>
+      <h1>{{pagePathFromParam}}</h1>
+      <div class='list-header'><h2>Key Sectors</h2><h2>Count</h2></div>
       <ul>
-        <li v-for='providerTime in currentPageWithTimesKeyProviders' v-bind:key='providerTime[0]'>
-          <div><strong>Provider:</strong> {{ getProviderFromID(providerTime[0]).name }}</div>
-          <div><strong>Sector:</strong> {{ getProviderFromID(providerTime[0]).sector }}</div>
-          <div><strong>Time On Page:</strong> {{ providerTime[1] }} seconds</div>
-          <button v-on:click='whitelistAddOrRemoveProvider({ action: "remove", id: providerTime[0] })'>Remove From Whitelist</button>
+        <li v-for='sector in Object.keys(keySectors)' :key='sector'>
+          <div>{{sector}}</div><div>{{keySectors[sector]}}</div>
         </li>
       </ul>
-      <h1 class='visitors'>Non-Important Visitors: {{ currentPageWithTimesNotKeyProviders.length }}</h1>
       <ul>
-        <li v-for='providerTime in currentPageWithTimesNotKeyProviders' v-bind:key='providerTime[0]'>
-          <div><strong>Provider:</strong> {{ getProviderFromID(providerTime[0]).name }}</div>
-          <div><strong>Time On Page:</strong> {{ providerTime[1] }} seconds</div>
-          <button v-on:click='whitelistAddOrRemoveProvider({ action: "add", id: providerTime[0] })'>Add To Whitelist</button>
+        <li><h2>Key Providers</h2><h2>Total Time On Page (seconds)</h2></li>
+        <li v-for='provider in keyProviders' :key='provider'>
+          <div>{{provider}}</div><div>{{page[provider].reduce((a, v) => a + v)}}</div>
         </li>
-      </ul> -->
+      </ul>
+      <ul>
+        <li><h2>All Providers</h2><h2>Total Time On Page (seconds)</h2></li>
+        <li v-for='provider in allProviders' :key='provider'>
+          <div>{{provider}}</div><div>{{page[provider].reduce((a, v) => a + v)}}</div>
+        </li>
+      </ul>
+      <h2>Page</h2>
+      {{ page }}
     </div>
+
     <div v-else-if='pagePathFromParamStatus === "fail"'>
       <h1>Something's wrong with the URL's "path" parameter</h1>
       <p>{{ pathMsgError }}<a>{{ pathMsgErrorLink }}</a></p>
     </div>
   </div>
+
 </template>
 
 <script>
@@ -72,14 +69,13 @@ export default {
       return this.allProviders.filter((p) => this.whitelist[p])
     },
     keySectors () {
-      var uniqueSectors = []
+      let sectors = {}
       this.keyProviders.map((kp) => {
         let sector = this.whitelist[kp].sector
-        if (uniqueSectors.indexOf(sector) === -1) {
-          uniqueSectors.push(sector)
-        }
+        sectors[sector] = sectors[sector] + 1 || 1
       })
-      return uniqueSectors
+      console.log('keySectors: ', sectors)
+      return sectors
     },
     ...mapGetters([
       'providers',
@@ -100,12 +96,6 @@ export default {
     ])
   },
   methods: {
-    // getProviderNameFromID (id) {
-    //   return this.providers.filter((p) => p.id === id)[0].name
-    // },
-    // getProviderFromID (id) {
-    //   return this.providers.filter((p) => p.id === id)[0]
-    // },
     ...mapActions([
       'getData',
       'getDataDynamic',
@@ -122,19 +112,27 @@ export default {
     } else {
       this.getPagePathFromParam2()
     }
-    // grab path from url param and add to Searching for all views of page: _______
-    // Todo: remove?: this.getData()
-    // check for path in store
-    // if !store.pages.length ||  path !found in store
-    // update pagePathParamStatus to "fail"
-    // explain failure in UI, and show button allowing another data fetch
-    // else if path found in store
-    // update pagePathParamStatus to "success"
   }
 }
 </script>
 
 <style scoped>
+.list-header {
+  padding-left: 5px;
+  padding-right: 5px;
+}
+.list-header, li {
+  margin-left: 10px;
+  margin-right: 10px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+li {
+  padding: 5px;
+  border-bottom: 1px solid #dce0e0;
+}
 .title {
   margin-top: 50px;
 }
@@ -142,27 +140,24 @@ export default {
   color: rgb(0, 132, 137);
   margin-top: 60px;
 }
-h1 {
+h1, h2 {
   font-weight: 700;
+  margin: 0;
+}
+h1 {
+  font-size: 3em;
+}
+h2 {
+  font-size: 2em;
 }
 ul {
   border: solid 1px #dce0e0;
   font-size: 16px;
+  margin-bottom: 100px;
+  margin-top: 0;
 }
-li {
-  padding: 20px;
-  border-bottom: 1px solid #dce0e0;
-  margin-left: 10px;
-  margin-right: 10px;
-}
-.pageviews, .pageviews li {
-  border: none;
-}
-.pageviews li {
-  background-color: #eee;
-}
-li > * {
-  margin: 5px;
+li:last-child {
+  border-bottom-color: transparent;
 }
 button {
   font-size: 14px;

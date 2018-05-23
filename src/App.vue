@@ -127,6 +127,9 @@ input {
 /***********************************/
 
 @media (max-width: 767px) {
+  html, body {
+    font-size: 10px;
+  }
   #app > #header {
     justify-content: center;
   }

@@ -2,13 +2,14 @@ import {
   FETCHING_DATA,
   GET_DATA_SUCCESS,
   GET_DATA_FAILURE,
-  VIEW_PROVIDER,
-  GET_PAGE_PATH_FROM_PARAM_SUCCESS,
-  GET_PAGE_PATH_FROM_PARAM_FAILURE,
+  GET_PATH_FROM_PARAM_SUCCESS,
+  GET_PATH_FROM_PARAM_FAILURE,
   WHITELIST_PROVIDER_FAILURE,
   WHITELIST_PROVIDER_SUCCESS,
   WHITELIST_CHANGE_PROVIDER_SECTOR_SUCCESS,
-  WHITELIST_CHANGE_PROVIDER_SECTOR_FAILURE
+  WHITELIST_CHANGE_PROVIDER_SECTOR_FAILURE,
+  GET_PROVIDERS_DATA_SUCCESS,
+  GET_PROVIDERS_DATA_FAILURE
 } from './types'
 import axios from 'axios'
 
@@ -20,7 +21,7 @@ export const getDataDynamic = ({commit, dispatch}) => {
     .then(response => {
       console.log('Response: ', response.data)
       commit(GET_DATA_SUCCESS, response.data)
-      dispatch('getPagePathFromParam2')
+      dispatch('getPathFromParam2')
     })
     .catch(e => {
       console.log('Error: ', e)
@@ -28,16 +29,16 @@ export const getDataDynamic = ({commit, dispatch}) => {
     })
 }
 
-export const getData = ({commit, dispatch}) => {
-  axios.get(`${process.env.API_BASE_URL}/api/data`)
+export const getProviderData = ({commit, dispatch}) => {
+  commit(FETCHING_DATA, true)
+  axios.get(`${process.env.API_BASE_URL}/api/data/providers`)
     .then(response => {
       console.log('Response: ', response.data)
-      commit(GET_DATA_SUCCESS, response.data)
-      // dispatch('getPagePathFromParam')
+      commit(GET_PROVIDERS_DATA_SUCCESS, response.data)
     })
     .catch(e => {
       console.log('Error: ', e)
-      commit(GET_DATA_FAILURE, e)
+      commit(GET_PROVIDERS_DATA_FAILURE, e)
     })
 }
 
@@ -53,31 +54,17 @@ export const getMoreData = ({commit}) => {
     })
 }
 
-export const viewProvider = ({commit}, providerID) => {
-  commit(VIEW_PROVIDER, providerID)
-}
-
-// export const getPagePathFromParam = ({commit, state}) => {
-//   let parsedUrl = new URL(window.location.href)
-//   let path = parsedUrl.searchParams.get('path')
-//   let page = state.data.pages.filter((p) => p.path === path)[0]
-//   if (page) {
-//     commit(GET_PAGE_PATH_FROM_PARAM_SUCCESS, path)
-//   } else {
-//     commit(GET_PAGE_PATH_FROM_PARAM_FAILURE, path)
-//   }
-// }
-export const getPagePathFromParam2 = ({commit, state, dispatch}) => {
+export const getPathFromParam2 = ({commit, state, dispatch}) => {
   let parsedUrl = new URL(window.location.href)
   let path = parsedUrl.searchParams.get('path')
   if (path) {
-    commit(GET_PAGE_PATH_FROM_PARAM_SUCCESS, path)
+    commit(GET_PATH_FROM_PARAM_SUCCESS, path)
   } else {
-    commit(GET_PAGE_PATH_FROM_PARAM_FAILURE, path)
+    commit(GET_PATH_FROM_PARAM_FAILURE, path)
   }
 }
-export const whitelistAddOrRemoveProvider = ({commit, dispatch}, {action, id}) => {
-  axios.post(`${process.env.API_BASE_URL}/api/providers/changeWhitelist`, {action, id})
+export const whitelistAddProvider = ({commit, dispatch}, {name, sector}) => {
+  axios.post(`${process.env.API_BASE_URL}/api/whitelist/addProvider`, {name, sector})
     .then(response => {
       let provider = response.data
       console.log('New Provider Data', provider)

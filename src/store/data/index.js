@@ -2,33 +2,31 @@ import {
   FETCHING_DATA,
   GET_DATA_SUCCESS,
   GET_DATA_FAILURE,
-  VIEW_PROVIDER,
-  GET_PAGE_PATH_FROM_PARAM_SUCCESS,
-  GET_PAGE_PATH_FROM_PARAM_FAILURE,
+  GET_PATH_FROM_PARAM_SUCCESS,
+  GET_PATH_FROM_PARAM_FAILURE,
   WHITELIST_PROVIDER_FAILURE,
   WHITELIST_PROVIDER_SUCCESS,
   WHITELIST_CHANGE_PROVIDER_SECTOR_SUCCESS,
-  WHITELIST_CHANGE_PROVIDER_SECTOR_FAILURE
+  WHITELIST_CHANGE_PROVIDER_SECTOR_FAILURE,
+  GET_PROVIDERS_DATA_SUCCESS,
+  GET_PROVIDERS_DATA_FAILURE
 } from './types'
 
-import { whitelist } from './whitelist'
+import { whitelist, whitelistSectors } from './whitelist'
 
 const state = {
   error: false,
-  // isViewingProvider: null,
-  // isViewingPage: {
-  //   id: null,
-  //   path: null
-  // },
   fetchingData: false,
-  providers: {},
-  pages: {},
-  pagePathFromParam: null,
-  pagePathFromParamStatus: null,
-  page: {},
-  pageFoundInStore: false,
-  whitelistSectors: [],
-  whitelist: whitelist
+  path: '',
+  providers: [],
+  providerSessions: {
+    // 'united states senate': [5, 247, 3], 'amazon': [33]
+  },
+  pathFromParam: '',
+  pathFromParamStatus: null,
+  pathFoundInStore: false,
+  whitelist: whitelist,
+  whitelistSectors: whitelistSectors
 }
 
 const mutations = {
@@ -37,10 +35,11 @@ const mutations = {
     state.fetchingData = boolean
   },
 
-  [GET_DATA_SUCCESS] (state, { providers, pages, sessions, pageviews }) {
+  [GET_DATA_SUCCESS] (state, { providers, path, providerSessions }) {
     state.error = false
     state.providers = providers
-    state.pages = pages
+    state.path = path
+    state.providerSessions = providerSessions
     state.fetchingData = false
   },
 
@@ -49,22 +48,27 @@ const mutations = {
     state.fetchingData = false
   },
 
-  [VIEW_PROVIDER] (state, providerID) {
-    state.isViewingProvider = providerID
+  [GET_PROVIDERS_DATA_SUCCESS] (state, providers) {
+    state.error = false
+    state.providers = providers
+    state.fetchingData = false
   },
 
-  [GET_PAGE_PATH_FROM_PARAM_SUCCESS] (state, path) {
-    state.pagePathFromParam = path
-    state.pagePathFromParamStatus = 'success'
+  [GET_PROVIDERS_DATA_FAILURE] (state, providers) {
+    state.error = true
+    state.fetchingData = false
+  },
+
+  [GET_PATH_FROM_PARAM_SUCCESS] (state, path) {
+    state.pathFromParam = path
+    state.pathFromParamStatus = 'success'
     let pathWithSlash = `${path}/`
-    state.pageFoundInStore = state.pages.hasOwnProperty(path) || state.pages.hasOwnProperty(pathWithSlash)
-    state.page = state.pages[path] || state.pages[pathWithSlash] || {}
-    // state.isViewingPage = state.pages.filter((p) => p.path === path)[0]
+    state.pathFoundInStore = ((state.path === path) || (state.path === pathWithSlash))
   },
 
-  [GET_PAGE_PATH_FROM_PARAM_FAILURE] (state, path) {
-    state.pagePathFromParam = path
-    state.pagePathFromParamStatus = 'fail'
+  [GET_PATH_FROM_PARAM_FAILURE] (state, path) {
+    state.pathFromParam = path
+    state.pathFromParamStatus = 'fail'
   },
 
   [WHITELIST_PROVIDER_FAILURE] (state) {

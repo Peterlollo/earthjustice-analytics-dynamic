@@ -1,4 +1,25 @@
 /* eslint-disable */
+export const whitelistSectors = [
+  "Federal Government",
+  "State Government Agencies",
+  "State Governments",
+  "Local Governments",
+  "International Government",
+  "Legal",
+  "Nonprofits",
+  "Foundations",
+  "Media",
+  "Aerospace and Transportation",
+  "Energy",
+  "Financial Services",
+  "Insurance",
+  "Pharma and Biotech and Chemicals",
+  "Technology",
+  "Consumer Goods and Services",
+  "Medical Institutions",
+  "Universities and Colleges",
+  "K-12 Schools"
+] 
 export const whitelist = {
   "department of veterans affairs": {
     "sector": "Federal Government"

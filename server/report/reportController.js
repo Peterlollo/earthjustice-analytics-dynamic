@@ -12,7 +12,8 @@ if (env === 'dev') {
 // const requestDynamic = helpers.initRequestDynamic()
 const makeReportRequestDynamic = helpers.makeReportRequestDynamic
 const storeReportDataDynamic = helpers.storeReportDataDynamic
-
+const storeReportDataProviders = helpers.storeReportDataProviders
+const makeReportRequestProviders = helpers.makeReportRequestProviders
 module.exports = {
   getAnalyticsDataDynamic: function (req, res, next) {
     const jwtClient = new google.auth.JWT(
@@ -22,15 +23,26 @@ module.exports = {
       ['https://www.googleapis.com/auth/analytics.readonly'], // an array of auth scopes
       null
     )
-    console.log('req.query.path >>>>>>>>>>>>', req.query.path)
-    // console.log('req.params.path >>>>>>>>>>>>', req.params.path)
     const path = req.query.path
-    // const pathWithSlash = `path${/}`
     // initialize first report request with pageToken set to '0'
     const requestDynamic = helpers.initRequestDynamic(path)
     makeReportRequestDynamic(jwtClient, requestDynamic, storeReportDataDynamic, '0', res, next)
   },
   sendDataDynamic: function (req, res, next) {
     res.send(res.locals.totalReportDataDynamic)
+  },
+  getProviders: function (req, res, next) {
+    const jwtClient = new google.auth.JWT(
+      key.client_email,
+      null,
+      key.private_key,
+      ['https://www.googleapis.com/auth/analytics.readonly'], // an array of auth scopes
+      null
+    )
+    const requestProviders = helpers.initRequestProviders()
+    makeReportRequestProviders(jwtClient, requestProviders, storeReportDataProviders, '0', res, next)
+  },
+  sendProviders: function (req, res, next) {
+    res.send(res.locals.totalReportDataProviders)
   }
 }

@@ -2,40 +2,48 @@ const {google} = require('googleapis')
 const analytics = google.analyticsreporting('v4')
 
 const totalReportDataDynamic = {
-  providers: {
-    // 'united states senate': [
-    // 'earthjustice.org/',
-    // 'earthjustice.org/about/staff'
-    // ]
-    // (keys are provider names and each provider name is stored only once;
-    // values is an array of strings representing pages visited)
-  },
-  pages: {
-    // 'earthjustice.org/': {
-    // 'united states senate': [5, 247, 3],
-    // 'amazon': [33]
-    // (keys are path names and each path name is only stored once;
-    // values are objects with { providerName: [time on page per session/visit] };
-    // time on page per session is an array of "visits" represented by # of seconds per visit)
+  providers: [],
+  path: '',
+  providerSessions: {
+  // 'united states senate': [5, 247, 3], 'amazon': [33]
   }
 }
+let totalReportDataProviders = []
+
 module.exports = {
-  // recursively generate report requests until pageToken === undefined
-  makeReportRequestDynamic: function (jwtClient, request, storeReportDataDynamic, pageToken, res, next) {
+  //  FOR PROVIDERS: recursively generate report requests until pageToken === undefined
+  makeReportRequestProviders: function (jwtClient, request, storeReportDataProviders, pageToken, res, next) {
     if (pageToken === '0') {
       // on first request, empty report data object of old report data
-      totalReportDataDynamic.providers = {}
-      totalReportDataDynamic.pages = {}
+      totalReportDataProviders = []
     }
 
     if (pageToken) {
       request.reportRequests[0].pageToken = pageToken
-      module.exports.authorizeDynamic(jwtClient, request, storeReportDataDynamic, res, next)
+      module.exports.authorizeProviders(jwtClient, request, storeReportDataProviders, res, next)
     } else {
+      console.log('REPORT REQUESTS FINISHED')
       next() // pass control to next route-defined function once all reports are requested
     }
   },
-  // authorize jwt client, send report request to GA api, call storeData method once report is received
+  // FOR Providers: authorize jwt client, send report request to GA api, call storeData method once report is received
+  authorizeProviders: function (jwtClient, request, storeReportDataProviders, res, next) {
+    jwtClient.authorize(function (err, tokens) {
+      if (err) {
+        console.log('ERROR WITH JWT AUTH:', err)
+      }
+      analytics.reports.batchGet({resource: request, auth: jwtClient}, function (err, resp) {
+        if (err) {
+          console.log('ERROR WITH REPORT BATCH-GET: ', err)
+        } else {
+          let report = resp.data.reports[0]
+          storeReportDataProviders(report, res)
+          module.exports.makeReportRequestProviders(jwtClient, request, storeReportDataProviders, report.nextPageToken, res, next)
+        }
+      })
+    })
+  },
+  // FOR PATHS: authorize jwt client, send report request to GA api, call storeData method once report is received
   authorizeDynamic: function (jwtClient, request, storeReportDataDynamic, res, next) {
     jwtClient.authorize(function (err, tokens) {
       if (err) {
@@ -53,10 +61,24 @@ module.exports = {
       })
     })
   },
-  // create initial request body
+  // FOR PATHS: recursively generate report requests until pageToken === undefined
+  makeReportRequestDynamic: function (jwtClient, request, storeReportDataDynamic, pageToken, res, next) {
+    if (pageToken === '0') {
+      // on first request, empty report data object of old report data
+      totalReportDataDynamic.providers = []
+      totalReportDataDynamic.path = ''
+      totalReportDataDynamic.providerSessions = {}
+    }
+
+    if (pageToken) {
+      request.reportRequests[0].pageToken = pageToken
+      module.exports.authorizeDynamic(jwtClient, request, storeReportDataDynamic, res, next)
+    } else {
+      next() // pass control to next route-defined function once all reports are requested
+    }
+  },
+  // create initial request body for page data
   initRequestDynamic: function (path) {
-    // TODO: filter this request by input ga:pagePath
-    console.log('path in initRequestDynamic>>>>>>>>>>> ', path)
     const viewID = '13972743' // Google Analytics view ID
     const request = {
       reportRequests: [
@@ -125,7 +147,7 @@ module.exports = {
     const rows = report.data.rows
 
     // add report data to DB
-    if(rows) {
+    if (rows) {
       for (let i = 0; i < rows.length; i++) {
         const rowDimensions = rows[i].dimensions
         const provider = rowDimensions[providerIndex]
@@ -133,15 +155,75 @@ module.exports = {
         const rowMetrics = rows[i].metrics[0].values
         const timeOnPage = Number(rowMetrics[timeOnPageIndex])
 
-        // add Provider
-        totalReportDataDynamic.providers[provider] = totalReportDataDynamic.providers[provider] || []
-        totalReportDataDynamic.providers[provider] = totalReportDataDynamic.providers[provider].concat(path)
-        // add Page
-        totalReportDataDynamic.pages[path] = totalReportDataDynamic.pages[path] || {}
-        totalReportDataDynamic.pages[path][provider] = totalReportDataDynamic.pages[path][provider] || []
-        totalReportDataDynamic.pages[path][provider] = totalReportDataDynamic.pages[path][provider].concat(timeOnPage)
+        if (totalReportDataDynamic.providers.indexOf(provider) === -1) {
+          totalReportDataDynamic.providers.push(provider)
+        }
+        if (!totalReportDataDynamic.path) {
+          totalReportDataDynamic.path = path
+        }
+        totalReportDataDynamic.providerSessions[provider] = totalReportDataDynamic.providerSessions[provider] || []
+        totalReportDataDynamic.providerSessions[provider].push(timeOnPage)
       }
     }
     res.locals.totalReportDataDynamic = totalReportDataDynamic
+  },
+  // store received GA report in DB
+  storeReportDataProviders: function (report, res) {
+    // report headers
+    const dimensions = report.columnHeader.dimensions
+
+    // indices of variables within rows
+    const providerIndex = dimensions.indexOf('ga:networkLocation')
+    const rows = report.data.rows
+
+    // add report data to DB
+    if (rows) {
+      for (let i = 0; i < rows.length; i++) {
+        const rowDimensions = rows[i].dimensions
+        const provider = rowDimensions[providerIndex]
+
+        if (totalReportDataProviders.indexOf(provider) === -1) {
+          totalReportDataProviders.push(provider)
+        }
+      }
+    }
+    res.locals.totalReportDataProviders = totalReportDataProviders
+  },
+  // create initial request body for providers data
+  initRequestProviders: function () {
+    const viewID = '13972743' // Google Analytics view ID
+    const request = {
+      reportRequests: [
+        {
+          viewId: viewID,
+          pageToken: '0', // API pagination offset
+          pageSize: 500, // Number of records to request
+          dateRanges: [ // Date ranges to request data from
+            {
+              startDate: '2daysAgo',
+              endDate: 'today'
+            }
+          ],
+          dimensions: [
+            {
+              name: 'ga:networkLocation'
+            }
+          ],
+          'dimensionFilterClauses': [
+            {
+              'filters': [
+                {
+                  'dimensionName': 'ga:networkLocation',
+                  'operator': 'REGEXP',
+                  'not': true,
+                  'expressions': '(not set|customer|internet|broadband|isp|cable com|network|tele|dsl|subscriber|pool|telecom|cable|addresses|telefonica|routed|leased line|communication|comcast|verizon|road runner|service provider|unknown|provider|t-mobile|wifi|telkom|sprint|at-t|residential|province|vodafone|clients|china|dial-up|netblock|wimax|wireless|elisa|sonera|dna oy|at&t|assigned|sl-cgn|block|consumers|kpn|telia|bredband|google|hosting|zscaler|city of|tdc|hubspot)'
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+    return request
   }
 }

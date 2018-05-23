@@ -1,14 +1,8 @@
 <template>
   <div>
-    <h1>Companies</h1>
-    <div class='scroll-down'>Scroll Down &#8595;</div>
-    <div class='scroll-right'>Scroll Right &#8594;
-</div>
-    <ul class='provider-list'>
-      <li v-for='provider in providersWithPageviews' :key='provider.id'
-        class='provider'
-        v-on:click='viewProvider(provider.id)'
-      >{{ provider.name }}
+    <ul>
+      <li v-for='provider in providers' :key='provider'>
+        <button v-on:click='whitelistAddProvider({name: provider, sector: null})'>Add {{provider}} to whitelist</button>
       </li>
     </ul>
   </div>
@@ -19,10 +13,18 @@ import { mapGetters, mapActions } from 'vuex'
 export default {
   name: 'Providers',
   computed: {
-    ...mapGetters([ 'providersWithPageviews' ])
+    ...mapGetters([ 'providers' ])
   },
   methods: {
-    ...mapActions([ 'viewProvider' ])
+    ...mapActions([
+      'whitelistAddProvider',
+      'getProviderData'
+    ])
+  },
+  created () {
+    if (!this.providers.length) { // no provider data in store
+      this.getProviderData()
+    }
   }
 }
 </script>

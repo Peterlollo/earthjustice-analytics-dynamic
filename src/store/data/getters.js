@@ -1,97 +1,54 @@
+export const path = state => state.data.path
 export const providers = state => state.data.providers
-export const page = state => state.data.page
-export const pages = state => state.data.pages
-export const pageviews = state => state.data.pageviews
-export const pagePathFromParam = state => state.data.pagePathFromParam
-export const pagePathFromParamStatus = state => state.data.pagePathFromParamStatus
+export const providerSessions = state => state.data.providerSessions
+export const pathFromParam = state => state.data.pathFromParam
+export const pathFromParamStatus = state => state.data.pathFromParamStatus
 export const fetchingData = state => state.data.fetchingData
-export const pageFoundInStore = state => state.data.pageFoundInStore
+export const pathFoundInStore = state => state.data.pathFoundInStore
 export const error = state => state.data.error
 export const whitelist = state => state.data.whitelist
-// export const isViewingProvider = state => {
-//   let providerID = state.data.isViewingProvider
-//   if (!providerID) {
-//     return {
-//       provider: { name: 'Choose a company to view' },
-//       sessionsPageviews: []
-//     }
-//   } else {
-//     let provider = state.data.providers.filter((p) => p.id === providerID)[0]
-//     let sessions = state.data.sessions.filter((s) => s.provider === providerID)
-//     let pageviews = state.data.pageviews
-//     let sessionIdsFromPageviews = state.data.pageviews.map((v) => v.session)
-//     let sessionsPageviews = sessions.filter((s) => {
-//       return sessionIdsFromPageviews.indexOf(s.id) > -1
-//     }).map((sess) => {
-//       sess.views = []
-//       pageviews.forEach((v) => {
-//         if (v.session === sess.id) {
-//           sess.views.push(v)
-//         }
-//       })
-//       return sess
-//     })
-//     return {provider, sessionsPageviews}
-//   }
-// }
-
-// export const providersWithPageviews = state => {
-//   let sessionIdsFromPageviews = state.data.pageviews.map((v) => v.session)
-//   let sessions = state.data.sessions.filter((s) => (sessionIdsFromPageviews.indexOf(s.id) > -1))
-//   let providerIdsFromSessions = sessions.map((s) => s.provider)
-//   let providers = state.data.providers.filter((p) => (providerIdsFromSessions.indexOf(p.id) > -1))
-//   return providers
-// }
-
-// export const isViewingPage = state => {
-//   return state.data.isViewingPage
-// }
-
-// export const allViewsOfCurrentPage = state => {
-//   let page = state.data.isViewingPage
-//   return page.id ? state.data.pageviews.filter((pv) => pv.page === page.id) : []
-// }
-
-// export const providersAndTimesGroupedForViewsOfCurrentPage = (state, get) => {
-//   let providerTimes = {}
-//   let page = state.data.isViewingPage
-//   if (!page.id) { // if no page is currently being viewed, return []
-//     return []
-//   }
-//   // find all pageviews associated with current page
-//   let pageviews = state.data.pageviews.filter((pv) => pv.page === page.id)
-//   pageviews.forEach((pv) => {
-//     // get provider id for all pageviews
-//     let providerID = pv.provider
-//     if (providerTimes[providerID]) {
-//       // create object which groups pageviews by provider and sums the seconds spent on page
-//       providerTimes[providerID] = providerTimes[providerID] + pv.seconds
-//     } else {
-//       providerTimes[providerID] = pv.seconds
-//     }
+export const whitelistSectors = state => state.data.whitelistSectors
+export const keyProviders = (state, get) => {
+  return get.providers.filter((p) => get.whitelist[p])
+}
+export const sessionsByKeyProviders = (state, get) => {
+  const result = {}
+  get.keyProviders.map((kp) => {
+    result[kp] = get.providerSessions[kp]
+  })
+  return result
+}
+export const keyProvidersBySector = (state, get) => {
+  const result = {}
+  get.keyProviders.map((kp) => {
+    let sector = get.whitelist[kp].sector
+    result[sector] = result[sector] || []
+    result[sector].push(kp)
+  })
+  return result
+}
+export const keyProvidersBySectorSortedBySession = (state, get) => {
+  const result = {}
+  const reducer = (a, v) => a + v
+  for (var sector in get.keyProvidersBySector) {
+    result[sector] = get.keyProvidersBySector[sector].slice(0)
+    result[sector].sort((kpA, kpB) => {
+      return get.sessionsByKeyProviders[kpB].reduce(reducer) - get.sessionsByKeyProviders[kpA].reduce(reducer)
+    })
+  }
+  return result
+}
+export const keySectorsSortedByProviderCount = (state, get) => {
+  return Object.keys(get.keyProvidersBySector).sort((s1, s2) => {
+    return get.keyProvidersBySector[s2].length - get.keyProvidersBySector[s1].length
+  })
+}
+// export const keyProvidersBySector = state => {
+//   let sectors = {}
+//   this.keyProviders.slice(0).map((kp) => {
+//     let sector = this.whitelist[kp].sector
+//     sectors[sector] = sectors[sector] || []
+//     sectors[sector].push(kp)
 //   })
-//   // create an array with tuples of [providerID, seconds]
-//   var sortedProviderTimes = []
-//   for (var provider in providerTimes) {
-//     sortedProviderTimes.push([Number(provider), providerTimes[provider]])
-//   }
-//   // sort tuples array by seconds, descending
-//   sortedProviderTimes.sort(function (a, b) {
-//     return b[1] - a[1]
-//   })
-
-//   return sortedProviderTimes
-// }
-
-// export const keyProviderIds = state => { // return array of key provider ids
-//   let keyProviders = state.data.providers.filter((p) => p.important === true)
-//   return keyProviders.length ? keyProviders.map((provider) => { return provider.id }) : []
-// }
-
-// export const currentPageWithTimesKeyProviders = (state, get) => { // return array of key providers with time spent on page
-//   return get.providersAndTimesGroupedForViewsOfCurrentPage.filter((p) => get.keyProviderIds.indexOf(p[0]) > -1)
-// }
-
-// export const currentPageWithTimesNotKeyProviders = (state, get) => { // return array of NON key providers with time spent on page
-//   return get.providersAndTimesGroupedForViewsOfCurrentPage.filter((p) => get.keyProviderIds.indexOf(p[0]) === -1)
+//   return sectors
 // }

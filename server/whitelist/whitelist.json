@@ -1463,9 +1463,6 @@
   "northern arizona university": {
     "sector": "Universities and Colleges"
   },
-  "alameda county office of education": {
-    "sector": "K-12 Schools"
-  },
   "humboldt state university": {
     "sector": "Universities and Colleges"
   },
@@ -2992,5 +2989,8 @@
   },
   "university of california - office of the president": {
     "sector": "Universities and Colleges"
+  },
+  "alameda county office of education": {
+    "sector": null
   }
 }

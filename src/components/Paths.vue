@@ -2,26 +2,26 @@
   <div>
 
     <!-- FETCHING DATA -->
-    <div v-if='fetchingData' class='section'>
+    <div v-if='fetchingPathData || fetchingWhitelistData' class='section no-border-bottom'>
       <h1>Fetching data...</h1>
     </div>
 
     <!-- NETWORK FAILURE -->
-    <div v-else-if='error' class='section'>
+    <div v-else-if='pathError || whitelistError' class='section'>
       <h1>Sorry, there was an error retrieving data from server</h1>
-      <button v-on:click='getDataDynamic'>Fetch Data</button>
+      <button v-on:click='getPathData'>Fetch Data</button>
     </div>
 
     <!-- NO NETWORK FAILURE, NO PARAM FAILURE, BUT PATH NOT FOUND IN STORE -->
-    <div v-else-if='pathFromParamStatus === "success" && !pathFoundInStore' class='section'>
+    <div v-else-if='pathFromParamStatus === "success" && !pathFoundInStore' class='section no-border-bottom'>
       <h1>Sorry, could not find that page path</h1>
       <p>{{ pathMsgError }}<a>{{ pathMsgErrorLink }}</a></p>
       <p>Or, try fetching the Google Analytics data</p>
-      <button v-on:click='getDataDynamic'>Fetch Data</button>
+      <button v-on:click='getPathData'>Fetch Data</button>
     </div>
 
     <!-- NO NETWORK FAILURE, BUT FAILURE WITH URL PARAM -->
-    <div v-else-if='pathFromParamStatus === "fail"'>
+    <div v-else-if='pathFromParamStatus === "fail"' class='section no-border-bottom'>
       <h1>Something's wrong with the URL's "path" parameter</h1>
       <p>{{ pathMsgError }}<a>{{ pathMsgErrorLink }}</a></p>
     </div>
@@ -51,27 +51,6 @@
           </ul>
         </div>
       </div>
-
-      <!-- <div class='section'>
-        <div class='list-header'><h2>Key Providers</h2><h2>Seconds</h2></div>
-        <ul>
-          <li v-for='provider in Object.keys(sessionsByKeyProviders)' :key='provider'>
-            <div>{{provider}}</div><div>{{sessionsByKeyProviders[provider].reduce((a, v) => a + v)}}</div>
-          </li>
-        </ul>
-      </div> -->
-      <!-- <div class='section'>
-        <div class='list-header'><h2>All Providers</h2><h2>Seconds</h2></div>
-        <ul>
-          <li v-for='provider in allProviders' :key='provider'>
-            <div>{{provider}}</div><div>{{page[provider].reduce((a, v) => a + v)}}</div>
-          </li>
-        </ul>
-      </div> -->
-      <!-- <div class='section'>
-        <h2>Page</h2>
-        {{ page }}
-      </div> -->
     </div>
 
   </div>
@@ -87,47 +66,39 @@ export default {
       pathMsgErrorLink: 'http://ej-analytics-prototype.herokuapp.com/pages?path=earthjustice.org/'
     }
   },
-  name: 'Page',
+  name: 'Paths',
   computed: {
-    // allProviders () {
-    //   return Object.keys(this.page)
-    // },
-    // keyProviders () {
-    //   return this.allProviders.filter((p) => this.whitelist[p])
-    // },
-    // keySectors () {
-    //   let sectors = {}
-    //   this.keyProviders.map((kp) => {
-    //     let sector = this.whitelist[kp].sector
-    //     sectors[sector] = sectors[sector] + 1 || 1
-    //   })
-    //   return sectors
-    // },
     ...mapGetters([
       'path',
       'pathFromParam',
       'pathFromParamStatus',
-      'fetchingData',
+      'fetchingPathData',
       'pathFoundInStore',
-      'error',
+      'pathError',
       'whitelist',
       'keyProvidersBySector',
       'sessionsByKeyProviders',
       'keyProvidersBySectorSortedBySession',
-      'keySectorsSortedByProviderCount'
+      'keySectorsSortedByProviderCount',
+      'fetchingWhitelistData',
+      'whitelistError'
     ])
   },
   methods: {
     ...mapActions([
-      'getDataDynamic',
-      'getPathFromParam2'
+      'getPathData',
+      'getPathFromParam',
+      'getWhitelistData'
     ])
   },
   created () {
-    if (!this.path) { // no page data in store
-      this.getDataDynamic()
+    if (!this.whitelist.length) {
+      this.getWhitelistData()
+    }
+    if (!this.path) { // no path data in store
+      this.getPathData()
     } else {
-      this.getPathFromParam2()
+      this.getPathFromParam()
     }
   }
 }

@@ -1,13 +1,13 @@
-export const path = state => state.data.path
-export const providers = state => state.data.providers
-export const providerSessions = state => state.data.providerSessions
-export const pathFromParam = state => state.data.pathFromParam
-export const pathFromParamStatus = state => state.data.pathFromParamStatus
-export const fetchingData = state => state.data.fetchingData
-export const pathFoundInStore = state => state.data.pathFoundInStore
-export const error = state => state.data.error
-export const whitelist = state => state.data.whitelist
-export const whitelistSectors = state => state.data.whitelistSectors
+export const path = state => state.path.path
+export const providers = state => state.path.providers
+export const providerSessions = state => state.path.providerSessions
+export const pathFromParam = state => state.path.pathFromParam
+export const pathFromParamStatus = state => state.path.pathFromParamStatus
+export const fetchingPathData = state => state.path.fetchingData
+export const pathFoundInStore = state => state.path.pathFoundInStore
+export const pathError = state => state.path.error
+export const whitelist = state => state.whitelist.whitelist
+export const whitelistSectors = state => state.whitelist.whitelistSectors
 export const keyProviders = (state, get) => {
   return get.providers.filter((p) => get.whitelist[p])
 }
@@ -43,12 +43,3 @@ export const keySectorsSortedByProviderCount = (state, get) => {
     return get.keyProvidersBySector[s2].length - get.keyProvidersBySector[s1].length
   })
 }
-// export const keyProvidersBySector = state => {
-//   let sectors = {}
-//   this.keyProviders.slice(0).map((kp) => {
-//     let sector = this.whitelist[kp].sector
-//     sectors[sector] = sectors[sector] || []
-//     sectors[sector].push(kp)
-//   })
-//   return sectors
-// }

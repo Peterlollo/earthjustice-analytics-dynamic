@@ -1,10 +1,8 @@
 import Vue from 'vue'
 import Router from 'vue-router'
-import Dynamic from '@/components/Dynamic'
-// import Provider from '@/components/Provider'
-import MoreData from '@/components/MoreData'
+import Home from '@/components/Home'
 import Providers from '@/components/Providers'
-import Page from '@/components/Page'
+import Paths from '@/components/Paths'
 import NotFoundComponent from '@/components/NotFoundComponent'
 
 Vue.use(Router)
@@ -16,9 +14,7 @@ export default new Router({
       path: '/',
       name: 'home',
       components: {
-        // main: Provider,
-        // sidebar: Providers
-        main: Dynamic
+        main: Home
       }
     },
     {
@@ -30,16 +26,9 @@ export default new Router({
     },
     {
       path: '/pages',
-      name: 'page',
+      name: 'paths',
       components: {
-        main: Page
-      }
-    },
-    {
-      path: '/fetchMoreData',
-      name: 'fetchMoreData',
-      components: {
-        main: MoreData
+        main: Paths
       }
     },
     {

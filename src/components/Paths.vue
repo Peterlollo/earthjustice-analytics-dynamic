@@ -32,7 +32,7 @@
         <h2 class='no-font-weight'>Page</h2>
         <p class='page-title'>{{pathFromParam}}</p>
       </div>
-      <div class='section'>
+      <div v-if='keySectorsSortedByProviderCount.length' class='section'>
         <div class='list-header'><h2>Key Sectors</h2><h2>Count</h2></div>
         <ul>
           <li v-for='sector in keySectorsSortedByProviderCount' :key='sector'>
@@ -40,6 +40,7 @@
           </li>
         </ul>
       </div>
+      <h2 v-else>No page views by whitelisted providers</h2>
 
       <div v-for='sector in keySectorsSortedByProviderCount' :key='sector'>
         <div class='section'>
@@ -50,6 +51,15 @@
             </li>
           </ul>
         </div>
+      </div>
+
+      <div class='section'>
+        <div class='list-header'><h2>Unlisted Providers</h2><h2>Seconds</h2></div>
+        <ul>
+          <li v-for='provider in unlistedProvidersSortedBySession' :key='provider'>
+            <div>{{provider}}</div><div>{{providerSessions[provider].reduce((a, v) => a + v)}}</div>
+          </li>
+        </ul>
       </div>
     </div>
 
@@ -80,7 +90,9 @@ export default {
       'keyProvidersBySectorSortedBySession',
       'keySectorsSortedByProviderCount',
       'fetchingWhitelistData',
-      'whitelistError'
+      'whitelistError',
+      'providerSessions',
+      'unlistedProvidersSortedBySession'
     ])
   },
   methods: {
@@ -91,7 +103,7 @@ export default {
     ])
   },
   created () {
-    if (!this.whitelist.length) {
+    if (!Object.keys(this.whitelist).length) { // no whitelist data in store
       this.getWhitelistData()
     }
     if (!this.path) { // no path data in store

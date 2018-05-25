@@ -43,3 +43,14 @@ export const keySectorsSortedByProviderCount = (state, get) => {
     return get.keyProvidersBySector[s2].length - get.keyProvidersBySector[s1].length
   })
 }
+
+export const unlistedProviders = (state, get) => {
+  return get.providers.filter((p) => !get.whitelist[p])
+}
+
+export const unlistedProvidersSortedBySession = (state, get) => {
+  const reducer = (a, v) => a + v
+  return get.unlistedProviders.slice(0).sort((p1, p2) => {
+    return get.providerSessions[p2].reduce(reducer) - get.providerSessions[p1].reduce(reducer)
+  })
+}

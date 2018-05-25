@@ -1,6 +1,8 @@
 <template>
   <div class='section no-border-bottom'>
     <h1 class='page-title'>Earthjustice Web Analytics</h1>
+    <a href='/providers'><button class='btn'>Providers</button></a>
+    <a href='/pages?path=earthjustice.org'><button class='btn'>Pages</button></a>
   </div>
 </template>
 

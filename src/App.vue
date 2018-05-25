@@ -1,7 +1,9 @@
 <template>
   <div id='app'>
+    <ModalSpinner></ModalSpinner>
+    <ModalSectors v-if='modalOpen'></ModalSectors>
     <header id='header'>
-      <div><img src='./assets/ej-logo-white.png' class='logo'></div>
+      <a href='/'><img src='./assets/ej-logo-white.png' class='logo'></a>
     </header>
     <div class='container'>
       <div class='main-row'>
@@ -14,8 +16,17 @@
 </template>
 
 <script>
+import {mapState} from 'vuex'
+import ModalSectors from './components/ModalSectors'
+import ModalSpinner from './components/ModalSpinner'
 export default {
-  name: 'App'
+  name: 'App',
+  components: {ModalSectors, ModalSpinner},
+  computed: {
+    ...mapState({
+      modalOpen: state => state.modal.modalOpen
+    })
+  }
 }
 </script>
 
@@ -121,6 +132,13 @@ input {
   margin: 0 0 10px 0;
   width: 100px;
   font-size: 1.35rem;
+}
+
+/* Transitions! usage: <transition name="blend">…</transition> */
+.blend-enter, .blend-leave-active { opacity: 0; }
+.blend-enter .blend-container,
+.blend-leave-active .blend-container {
+  transform: scale(1.1);
 }
 
 /*********** Media Queries  **********/

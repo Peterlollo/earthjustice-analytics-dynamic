@@ -1,7 +1,16 @@
 <template>
-  <div v-if='fetchingProviderData || fetchingWhitelistData' class='section'>
+  <!-- FETCHING DATA -->
+  <div v-if='fetchingProviderData || fetchingWhitelistData' class='section no-border-bottom'>
     <h1>Fetching data...</h1>
   </div>
+
+  <!-- NETWORK FAILURE -->
+  <div v-else-if='providerDataError || whitelistDataError' class='section'>
+    <h1>Sorry, there was an error retrieving data from server</h1>
+    <button v-on:click='getWhitelistOrProviderData' class='btn'>Fetch Data</button>
+  </div>
+
+  <!-- WHITELIST AND PROVIDER DATA SUCCESS -->
   <div v-else class='section no-border-bottom'>
     <h1 class='page-title'>Providers</h1>
     <div class='list-options'>
@@ -18,7 +27,8 @@
         <li v-for='provider in unlistedProviders' :key='provider'>
           <div>{{provider}}</div>
           <div>
-            <button class='btn' v-on:click='whitelistAddProvider({name: provider, sector: null})'>Add</button>
+            <button class='btn' v-on:click='beginAddingProvider(provider)'>Add</button>
+            <!-- <button class='btn' v-on:click='whitelistAddProvider({name: provider, sector: null})'>Add</button> -->
           </div>
         </li>
       </ul>
@@ -58,21 +68,37 @@ export default {
       providers: state => state.provider.providers,
       fetchingProviderData: state => state.provider.fetchingData,
       whitelist: state => state.whitelist.whitelist,
-      fetchingWhitelistData: state => state.whitelist.fetchingData
+      fetchingWhitelistData: state => state.whitelist.fetchingData,
+      providerDataError: state => state.provider.error,
+      whitelistDataError: state => state.whitelist.error
     })
   },
   methods: {
+    beginAddingProvider (provider) {
+      this.setProviderToAdd(provider)
+      this.openModal()
+    },
     toggleWhitelistedProviders () {
       this.showWhitelistedProviders = !this.showWhitelistedProviders
     },
     toggleUnlistedProviders () {
       this.showUnlistedProviders = !this.showUnlistedProviders
     },
+    getWhitelistOrProviderData () {
+      if (this.providerDataError) {
+        this.getProviderData()
+      }
+      if (this.whitelistDataError) {
+        this.getWhitelistData()
+      }
+    },
     ...mapActions([
       'whitelistAddProvider',
       'whitelistRemoveProvider',
       'getProviderData',
-      'getWhitelistData'
+      'getWhitelistData',
+      'openModal',
+      'setProviderToAdd'
     ])
   },
   created () {

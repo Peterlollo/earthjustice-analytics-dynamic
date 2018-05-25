@@ -9,21 +9,21 @@
     <!-- NETWORK FAILURE -->
     <div v-else-if='pathError || whitelistError' class='section'>
       <h1>Sorry, there was an error retrieving data from server</h1>
-      <button v-on:click='getPathData'>Fetch Data</button>
+      <button v-on:click='getPathData' class='btn'>Fetch Data</button>
     </div>
 
     <!-- NO NETWORK FAILURE, NO PARAM FAILURE, BUT PATH NOT FOUND IN STORE -->
     <div v-else-if='pathFromParamStatus === "success" && !pathFoundInStore' class='section no-border-bottom'>
       <h1>Sorry, could not find that page path</h1>
-      <p>{{ pathMsgError }}<a>{{ pathMsgErrorLink }}</a></p>
-      <p>Or, try fetching the Google Analytics data</p>
-      <button v-on:click='getPathData'>Fetch Data</button>
+      <p>{{ pathMsgError }}</p>
+      <p>Or, try re-fetching the Google Analytics data</p>
+      <button v-on:click='getPathData' class='btn'>Fetch Data</button>
     </div>
 
     <!-- NO NETWORK FAILURE, BUT FAILURE WITH URL PARAM -->
     <div v-else-if='pathFromParamStatus === "fail"' class='section no-border-bottom'>
       <h1>Something's wrong with the URL's "path" parameter</h1>
-      <p>{{ pathMsgError }}<a>{{ pathMsgErrorLink }}</a></p>
+      <p>{{ pathMsgError }}</p>
     </div>
 
     <!-- NETWORK/PARAM/PATH_IN_STORE SUCCESS -->
@@ -62,8 +62,7 @@ import { mapGetters, mapActions } from 'vuex'
 export default {
   data: () => {
     return {
-      pathMsgError: 'Try editing the URL in your browser\'s address bar to search for a new path. Sometimes the "path" parameter requires a "/" at the end. For example:',
-      pathMsgErrorLink: 'http://ej-analytics-prototype.herokuapp.com/pages?path=earthjustice.org/'
+      pathMsgError: 'Try editing the URL in your browser\'s address bar to search for a new path.'
     }
   },
   name: 'Paths',
@@ -122,6 +121,7 @@ export default {
   font-weight: 700;
   font-size: 5rem;
   margin: 0;
+  overflow-wrap: break-word;
 }
 /* List Items */
 /**************/
@@ -154,18 +154,6 @@ h1 {
 }
 h2 {
   font-size: 2rem;
-}
-button {
-  font-size: 14px;
-  font-weight: 700;
-  padding: 10px;
-  border-radius: 4px;
-  margin: 10px;
-  background-color: #384249;
-  color: #fff;
-}
-button:hover {
-  cursor: pointer;
 }
 a {
   cursor: pointer;

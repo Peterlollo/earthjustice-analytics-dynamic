@@ -1,7 +1,9 @@
 <template>
   <div id='app'>
+    <ModalSpinner></ModalSpinner>
+    <ModalSectors v-if='modalOpen'></ModalSectors>
     <header id='header'>
-      <div><img src='./assets/ej-logo-white.png' class='logo'></div>
+      <a href='/'><img src='./assets/ej-logo-white.png' class='logo'></a>
     </header>
     <div class='container'>
       <div class='main-row'>
@@ -14,8 +16,17 @@
 </template>
 
 <script>
+import {mapState} from 'vuex'
+import ModalSectors from './components/ModalSectors'
+import ModalSpinner from './components/ModalSpinner'
 export default {
-  name: 'App'
+  name: 'App',
+  components: {ModalSectors, ModalSpinner},
+  computed: {
+    ...mapState({
+      modalOpen: state => state.modal.modalOpen
+    })
+  }
 }
 </script>
 
@@ -31,7 +42,6 @@ html, body {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
   display: flex;
   flex-direction: column;
@@ -39,7 +49,6 @@ html, body {
   background: ;
   color: #484848;
   min-height: 100vh;
-  text-align: center;
 }
 #app > #header {
   background-color: #38424A;
@@ -125,10 +134,20 @@ input {
   font-size: 1.35rem;
 }
 
+/* Transitions! usage: <transition name="blend">…</transition> */
+.blend-enter, .blend-leave-active { opacity: 0; }
+.blend-enter .blend-container,
+.blend-leave-active .blend-container {
+  transform: scale(1.1);
+}
+
 /*********** Media Queries  **********/
 /***********************************/
 
 @media (max-width: 767px) {
+  html, body {
+    font-size: 10px;
+  }
   #app > #header {
     justify-content: center;
   }

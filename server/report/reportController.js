@@ -1,7 +1,3 @@
-const Provider = require('../provider/provider.js')
-const Page = require('../page/page.js')
-const Session = require('../session/session.js')
-const Pageview = require('../pageview/pageview.js')
 const helpers = require('./helpers')
 const {google} = require('googleapis')
 const env = process.env.NODE_ENV || 'dev'
@@ -14,12 +10,8 @@ if (env === 'dev') {
   key.private_key = process.env.GOOGLE_KEY_PRIVATE_KEY.replace(/\\n/g, '\n')
 }
 
-const request = helpers.initRequest()
-const makeReportRequest = helpers.makeReportRequest
-const storeReportData = helpers.storeReportData
-
 module.exports = {
-  getAnalyticsData: function (req, res, next) {
+  getData: function (req, res, next) {
     const jwtClient = new google.auth.JWT(
       key.client_email,
       null,
@@ -27,18 +19,14 @@ module.exports = {
       ['https://www.googleapis.com/auth/analytics.readonly'], // an array of auth scopes
       null
     )
+    const path = req.query.path
+    const options = {path}
+    const request = helpers.initRequest(options)
+    const dataRequest = path ? 'paths' : 'providers'
     // initialize first report request with pageToken set to '0'
-    makeReportRequest(jwtClient, request, storeReportData, '0', next)
+    helpers.makeReportRequest(jwtClient, request, helpers.storeReportData, '0', res, next, dataRequest)
   },
   sendData: function (req, res, next) {
-    Provider.findAll().then((providers) => {
-      Page.findAll().then((pages) => {
-        Session.findAll().then((sessions) => {
-          Pageview.findAll().then((pageviews) => {
-            res.send({providers, pages, sessions, pageviews})
-          })
-        })
-      })
-    })
+    res.send(res.locals.totalReportData)
   }
 }

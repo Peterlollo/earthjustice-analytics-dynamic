@@ -2,8 +2,10 @@ import {
   FETCHING_PATH_DATA,
   GET_PATH_DATA_SUCCESS,
   GET_PATH_DATA_FAILURE,
+  GET_PATH_DATA_COMPLETE,
   GET_PATH_FROM_PARAM_SUCCESS,
-  GET_PATH_FROM_PARAM_FAILURE
+  GET_PATH_FROM_PARAM_FAILURE,
+  SET_DAYS_AGO
 } from './types'
 
 const state = {
@@ -16,13 +18,16 @@ const state = {
   },
   pathFromParam: '',
   pathFromParamStatus: null,
-  pathFoundInStore: false
+  pathFoundInStore: false,
+  pollingPaths: false,
+  googleAnalyticsDaysAgo: 2
 }
 
 const mutations = {
 
   [FETCHING_PATH_DATA] (state, bool) {
     state.fetchingData = bool
+    state.pollingPaths = bool
   },
 
   [GET_PATH_DATA_SUCCESS] (state, { providers, path, providerSessions }) {
@@ -36,6 +41,11 @@ const mutations = {
   [GET_PATH_DATA_FAILURE] (state, error) {
     state.error = true
     state.fetchingData = false
+    state.pollingPaths = false
+  },
+
+  [GET_PATH_DATA_COMPLETE] (state, error) {
+    state.pollingPaths = false
   },
 
   [GET_PATH_FROM_PARAM_SUCCESS] (state, path) {
@@ -48,6 +58,10 @@ const mutations = {
   [GET_PATH_FROM_PARAM_FAILURE] (state, path) {
     state.pathFromParam = path
     state.pathFromParamStatus = 'fail'
+  },
+
+  [SET_DAYS_AGO] (state, daysAgo) {
+    state.googleAnalyticsDaysAgo = daysAgo
   }
 
 }

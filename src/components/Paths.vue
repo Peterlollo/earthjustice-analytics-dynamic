@@ -12,6 +12,11 @@
       <button v-on:click='getPathData' class='btn'>Fetch Data</button>
     </div>
 
+    <!-- STILL POLLING FOR DATA, NO NETWORK FAILURE, NO PARAM FAILURE, AND PATH NOT FOUND IN STORE -->
+    <div v-else-if='pollingPaths && pathFromParamStatus === "success" && !pathFoundInStore' class='section no-border-bottom'>
+      <h1 class='polling'>Data is loading</h1>
+    </div>
+
     <!-- NO NETWORK FAILURE, NO PARAM FAILURE, BUT PATH NOT FOUND IN STORE -->
     <div v-else-if='pathFromParamStatus === "success" && !pathFoundInStore' class='section no-border-bottom'>
       <h1>Sorry, could not find that page path</h1>
@@ -28,9 +33,21 @@
 
     <!-- NETWORK/PARAM/PATH_IN_STORE SUCCESS -->
     <div v-else-if='pathFromParamStatus === "success" && pathFoundInStore'>
+      <div v-if='pollingPaths'>
+        <h1 class='polling'>Data is loading</h1>
+      </div>
       <div class='section no-border-bottom'>
         <h2 class='no-font-weight'>Page</h2>
         <p class='page-title'>{{pathFromParam}}</p>
+        <div class='days-ago'>
+          <h2 class='no-font-weight'>Showing data from the last {{daysAgo}} days</h2>
+          <button v-on:click='toggleDaysAgoInput' class='btn'>{{daysAgoBtnMsg}}</button>
+          <div v-show='showDaysAgoInput' class='change-days-ago'>
+            <label>From how many days back do you want to fetch data?</label>
+            <input type='number' min='1' v-model='newDaysAgo' placeholder='Example: 10'/>
+            <button v-on:click='setRangeAndFetchData()' class='btn'>Fetch Data</button>
+          </div>
+        </div>
       </div>
       <div v-if='keySectorsSortedByProviderCount.length' class='section'>
         <div class='list-header'><h2>Key Sectors</h2><h2>Count</h2></div>
@@ -68,15 +85,22 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import { mapGetters, mapActions, mapState } from 'vuex'
 export default {
   data: () => {
     return {
-      pathMsgError: 'Try editing the URL in your browser\'s address bar to search for a new path.'
+      pathMsgError: 'Try editing the URL in your browser\'s address bar to search for a new path.',
+      daysAgoBtnMsg: 'Edit',
+      showDaysAgoInput: false,
+      newDaysAgo: ''
     }
   },
   name: 'Paths',
   computed: {
+    ...mapState({
+      pollingPaths: state => state.path.pollingPaths,
+      daysAgo: state => state.path.googleAnalyticsDaysAgo
+    }),
     ...mapGetters([
       'path',
       'pathFromParam',
@@ -96,10 +120,20 @@ export default {
     ])
   },
   methods: {
+    setRangeAndFetchData () {
+      this.toggleDaysAgoInput()
+      this.setDaysAgo(this.newDaysAgo)
+      this.getPathData()
+    },
+    toggleDaysAgoInput () {
+      this.daysAgoBtnMsg = this.showDaysAgoInput ? 'Edit' : 'Hide'
+      this.showDaysAgoInput = !this.showDaysAgoInput
+    },
     ...mapActions([
       'getPathData',
       'getPathFromParam',
-      'getWhitelistData'
+      'getWhitelistData',
+      'setDaysAgo'
     ])
   },
   created () {
@@ -127,8 +161,38 @@ export default {
 .no-border-bottom {
   border-bottom-color: transparent;
 }
+/* DAYS AGO SECTION */
+/**********/
+.days-ago {
+  display: flex;
+  flex-direction: column;
+}
+.days-ago .btn {
+  max-width: 200px;
+}
+.days-ago .change-days-ago {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.change-days-ago input {
+  min-width: 200px;
+}
+.change-days-ago label {
+  font-size: 2rem;
+}
 /* TITLES */
 /**********/
+.polling {
+  min-height: 35px;
+  animation: blinker 2s linear infinite;
+}
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
+}
 .page-title {
   font-weight: 700;
   font-size: 5rem;

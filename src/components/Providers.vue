@@ -1,7 +1,7 @@
 <template>
   <!-- FETCHING DATA -->
   <div v-if='fetchingProviderData || fetchingWhitelistData' class='section no-border-bottom'>
-    <h1>Fetching data...</h1>
+    <h1 class='polling'>Fetching data...</h1>
   </div>
 
   <!-- NETWORK FAILURE -->
@@ -12,7 +12,17 @@
 
   <!-- WHITELIST AND PROVIDER DATA SUCCESS -->
   <div v-else class='section no-border-bottom'>
+    <h2 class='polling'>{{ pollingProvidersMsg }}</h2>
     <h1 class='page-title'>Providers</h1>
+    <div class='days-ago'>
+      <h2 class='no-font-weight'>Showing data from the last {{daysAgo}} days</h2>
+      <button v-on:click='toggleDaysAgo' class='btn'>{{daysAgoBtnMsg}}</button>
+      <div v-show='showDaysAgo' class='change-days-ago'>
+        <label>From how many days back do you want to fetch data?</label>
+        <input type='number' min='1' v-model='newDaysAgo' placeholder='Example: 10'/>
+        <button v-on:click='setDaysAgoAndFetchData()' class='btn'>Fetch Data</button>
+      </div>
+    </div>
     <div class='list-options'>
       <button v-on:click='toggleWhitelistedProviders' class='btn'>
         {{showWhitelistedProviders ? 'Hide' : 'Show' }} Whitelisted Providers
@@ -28,7 +38,6 @@
           <div>{{provider}}</div>
           <div>
             <button class='btn' v-on:click='beginAddingProvider(provider)'>Add</button>
-            <!-- <button class='btn' v-on:click='whitelistAddProvider({name: provider, sector: null})'>Add</button> -->
           </div>
         </li>
       </ul>
@@ -54,15 +63,21 @@ export default {
   data: () => {
     return {
       showUnlistedProviders: false,
-      showWhitelistedProviders: false
+      showWhitelistedProviders: false,
+      daysAgoBtnMsg: 'Edit',
+      showDaysAgo: false,
+      newDaysAgo: ''
     }
   },
   computed: {
+    pollingProvidersMsg () {
+      return this.pollingProviders ? 'Still fetching more provider data...' : ''
+    },
     unlistedProviders () {
       return this.providers.filter((p) => !this.whitelist[p])
     },
     whitelistedProviders () {
-      return this.providers.filter((p) => this.whitelist[p])
+      return Object.keys(this.whitelist).sort()
     },
     ...mapState({
       providers: state => state.provider.providers,
@@ -70,10 +85,21 @@ export default {
       whitelist: state => state.whitelist.whitelist,
       fetchingWhitelistData: state => state.whitelist.fetchingData,
       providerDataError: state => state.provider.error,
-      whitelistDataError: state => state.whitelist.error
+      whitelistDataError: state => state.whitelist.error,
+      pollingProviders: state => state.provider.pollingProviders,
+      daysAgo: state => state.path.googleAnalyticsDaysAgo
     })
   },
   methods: {
+    setDaysAgoAndFetchData () {
+      this.toggleDaysAgo()
+      this.setDaysAgo(this.newDaysAgo)
+      this.getProviderData()
+    },
+    toggleDaysAgo () {
+      this.daysAgoBtnMsg = this.showDaysAgo ? 'Edit' : 'Hide'
+      this.showDaysAgo = !this.showDaysAgo
+    },
     beginAddingProvider (provider) {
       this.setProviderToAdd(provider)
       this.openModal()
@@ -98,7 +124,8 @@ export default {
       'getProviderData',
       'getWhitelistData',
       'openModal',
-      'setProviderToAdd'
+      'setProviderToAdd',
+      'setDaysAgo'
     ])
   },
   created () {
@@ -124,8 +151,40 @@ export default {
 .no-border-bottom {
   border-bottom-color: transparent;
 }
+/* DAYS AGO SECTION */
+/**********/
+.days-ago {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+.days-ago .btn {
+  max-width: 200px;
+}
+.days-ago .change-days-ago {
+  margin-top: 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.change-days-ago input {
+  min-width: 200px;
+}
+.change-days-ago label {
+  font-size: 2rem;
+}
 /* TITLES */
 /**********/
+.polling {
+  min-height: 35px;
+  animation: blinker 2s linear infinite;
+}
+
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
+}
 .page-title {
   font-weight: 700;
   font-size: 5rem;

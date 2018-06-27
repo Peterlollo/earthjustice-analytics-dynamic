@@ -1,17 +1,51 @@
 const {google} = require('googleapis')
 const analytics = google.analyticsreporting('v4')
+const whitelist = require('../whitelist/whitelist.json')
+const whitelistSectors = require('../whitelist/whitelist-sectors.json')
 
-const totalReportDataDynamic = {
-  providers: [],
-  path: '',
-  providerSessions: {
-  // 'united states senate': [5, 247, 3], 'amazon': [33], <provider>: <providerSessions>
-  }
+// ********* reportData format *********
+// *************************************
+// const reportData = {
+//   providers: [],
+//   path: '',
+//   providerSessions: {
+//     'united states senate': [5, 247, 3],
+//     'amazon': [33],
+//     <provider>: <providerSessions>
+//     where <providerSessions> is an array of session-time-lengths in seconds
+//   }
+// }
+
+const topLevelData = () => {
+  let whiteProviders = whitelist
+  let keyProviders = module.exports.reportData.providers.filter((p) => {
+    return whiteProviders[p]
+  })
+  console.log('keyProviders.length', keyProviders.length)
+  let keyProvidersBySector = {}
+  keyProviders.map((kp) => {
+    let sector = whitelist[kp].sector
+    keyProvidersBySector[sector] = keyProvidersBySector[sector] || []
+    keyProvidersBySector[sector].push(kp)
+  })
+  let keySectorsSortedByProviderCount = Object.keys(keyProvidersBySector).sort((s1, s2) => {
+    return keyProvidersBySector[s2].length - keyProvidersBySector[s1].length
+  })
+  let keySectorsWithProviderCount = {}
+  keySectorsSortedByProviderCount.forEach((sector) => {
+    keySectorsWithProviderCount[sector] = keyProvidersBySector[sector].length
+  })
+  return keySectorsWithProviderCount
 }
-let totalReportDataProviders = []
 
 module.exports = {
-  authorize: function (jwtClient, request, storeReportData, res, next, dataRequest) {
+  pageToken: undefined,
+  reportData: {
+    providers: [],
+    path: '',
+    providerSessions: {}
+  },
+  authorize: function (jwtClient, request, storeReportData, res, next, options) {
     jwtClient.authorize(function (err, tokens) {
       if (err) {
         console.log('ERROR WITH JWT AUTH:', err)
@@ -21,32 +55,41 @@ module.exports = {
           console.log('ERROR WITH REPORT BATCH-GET: ', err)
         } else {
           let report = resp.data.reports[0]
-          const options = {dataRequest}
           storeReportData(report, res, options)
-          module.exports.makeReportRequest(jwtClient, request, storeReportData, report.nextPageToken, res, next, dataRequest)
+          module.exports.makeReportRequest(jwtClient, request, storeReportData, report.nextPageToken, res, next, options)
         }
       })
     })
   },
-  makeReportRequest: function (jwtClient, request, storeReportData, pageToken, res, next, dataRequest) {
-    if (pageToken === '0') {
-      // on first request, empty report data objects of old report data
-      totalReportDataProviders = []
-      totalReportDataDynamic.providers = []
-      totalReportDataDynamic.path = ''
-      totalReportDataDynamic.providerSessions = {}
-    }
-
-    if (pageToken) {
-      request.reportRequests[0].pageToken = pageToken
-      module.exports.authorize(jwtClient, request, storeReportData, res, next, dataRequest)
-    } else {
+  // TODO: can we still have a next() function? does this function continue in background?
+  makeReportRequest: function (jwtClient, request, storeReportData, pageToken, res, next, options) {
+    // reset pageToken inside request body to "0"
+    request.reportRequests[0].pageToken = pageToken
+    module.exports.pageToken = pageToken
+    if (!pageToken) { // page token is undefined
+      if (options.org === 'earthjustice') {
+        let result = topLevelData()
+        res.send(result)
+      }
       console.log('REPORT REQUESTS FINISHED')
-      next() // pass control to next route-defined function once all reports are requested
+    } else if (pageToken === '0') { // first request for data
+      if (options.org !== 'earthjustice') {
+        res.send({pageToken})
+      }
+      // empty report data objects of old report data
+      module.exports.reportData.providers = []
+      module.exports.reportData.path = ''
+      module.exports.reportData.providerSessions = {}
+      // authorize request
+      module.exports.authorize(jwtClient, request, storeReportData, res, next, options)
+    } else { // page token is not zero, but is defined
+      module.exports.authorize(jwtClient, request, storeReportData, res, next, options)
     }
+    // next() // pass control to next route-defined function once all reports are requested
   },
   // create initial request body for data
   initRequest: function (options) {
+    let days = 2
     const metrics = []
     const dimensionFilterClauses = [
       {
@@ -70,6 +113,10 @@ module.exports = {
         }]
       })
     }
+    if (options.daysAgo && (typeof(options.daysAgo) === 'number')) {
+      console.log('options.daysAgo = a number')
+      days = options.daysAgo
+    }
     const viewID = '13972743' // Google Analytics view ID
     const request = {
       reportRequests: [
@@ -78,8 +125,9 @@ module.exports = {
           pageToken: '0', // API pagination offset
           pageSize: 500, // Number of records to request
           dateRanges: [ // Date ranges to request data from
+          // alternative syntax: startDate: Date.parse('2016/10/01')
             {
-              startDate: '2daysAgo',
+              startDate: `${days}daysAgo`,
               endDate: 'today'
             }
           ],
@@ -121,22 +169,23 @@ module.exports = {
         const path = rowDimensions[pathIndex]
         const rowMetrics = rows[i].metrics[0].values
         const timeOnPage = Number(rowMetrics[timeOnPageIndex])
-        if (options.dataRequest === 'providers') {
-          if (totalReportDataProviders.indexOf(provider) === -1) {
-            totalReportDataProviders.push(provider)
+        // add providers
+        if (module.exports.reportData.providers.indexOf(provider) === -1) {
+          module.exports.reportData.providers.push(provider)
+        }
+        if (options.path) {
+          // todo: do we need this if statement?
+          // add path
+          if (!module.exports.reportData.path) {
+            module.exports.reportData.path = path
           }
-        } else if (options.dataRequest === 'paths') {
-          if (totalReportDataDynamic.providers.indexOf(provider) === -1) {
-            totalReportDataDynamic.providers.push(provider)
-          }
-          if (!totalReportDataDynamic.path) {
-            totalReportDataDynamic.path = path
-          }
-          totalReportDataDynamic.providerSessions[provider] = totalReportDataDynamic.providerSessions[provider] || []
-          totalReportDataDynamic.providerSessions[provider].push(timeOnPage)
+          // add providerSessions
+          module.exports.reportData.providerSessions[provider] = module.exports.reportData.providerSessions[provider] || []
+          module.exports.reportData.providerSessions[provider].push(timeOnPage)
         }
       }
     }
-    res.locals.totalReportData = options.dataRequest === 'providers' ? totalReportDataProviders : totalReportDataDynamic
+    // todo: remove this? or will we use send function and next()
+    res.locals.reportData = module.exports.reportData
   }
 }

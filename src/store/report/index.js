@@ -1,8 +1,8 @@
 import {
-  FETCHING_PATH_DATA,
-  GET_PATH_DATA_SUCCESS,
-  GET_PATH_DATA_FAILURE,
-  GET_PATH_DATA_COMPLETE,
+  FETCHING_REPORT_DATA,
+  GET_REPORT_DATA_SUCCESS,
+  GET_REPORT_DATA_FAILURE,
+  GET_REPORT_DATA_COMPLETE,
   GET_PATH_FROM_PARAM_SUCCESS,
   GET_PATH_FROM_PARAM_FAILURE,
   SET_DAYS_AGO
@@ -19,18 +19,18 @@ const state = {
   pathFromParam: '',
   pathFromParamStatus: null,
   pathFoundInStore: false,
-  pollingPaths: false,
+  polling: false,
   googleAnalyticsDaysAgo: 2
 }
 
 const mutations = {
 
-  [FETCHING_PATH_DATA] (state, bool) {
+  [FETCHING_REPORT_DATA] (state, bool) {
     state.fetchingData = bool
-    state.pollingPaths = bool
+    state.polling = bool
   },
 
-  [GET_PATH_DATA_SUCCESS] (state, { providers, path, providerSessions }) {
+  [GET_REPORT_DATA_SUCCESS] (state, { providers, path, providerSessions }) {
     state.providers = providers
     state.path = path
     state.providerSessions = providerSessions
@@ -38,14 +38,14 @@ const mutations = {
     state.fetchingData = false
   },
 
-  [GET_PATH_DATA_FAILURE] (state, error) {
+  [GET_REPORT_DATA_FAILURE] (state, error) {
     state.error = true
     state.fetchingData = false
-    state.pollingPaths = false
+    state.polling = false
   },
 
-  [GET_PATH_DATA_COMPLETE] (state, error) {
-    state.pollingPaths = false
+  [GET_REPORT_DATA_COMPLETE] (state, error) {
+    state.polling = false
   },
 
   [GET_PATH_FROM_PARAM_SUCCESS] (state, path) {

@@ -27,17 +27,11 @@ module.exports = {
     const path = req.query.path
     const daysAgo = Number(req.query.daysAgo)
     const options = {path, daysAgo, org}
-    console.log('options: ', options)
     const request = helpers.initRequest(options)
     // initialize first report request with pageToken set to '0'
     helpers.makeReportRequest(jwtClient, request, helpers.storeReportData, '0', res, next, options)
   },
-  // todo: remove?
-  sendData: function (req, res, next) {
-    res.send(res.locals.reportData)
-  },
   pollData: function (req, res, next) {
-    console.log('pageToken: ', helpers.pageToken)
     let pageToken = helpers.pageToken
     let reportData = helpers.reportData
     res.send({pageToken, reportData})

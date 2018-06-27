@@ -5,7 +5,7 @@ const whitelistSectors = require('../whitelist/whitelist-sectors.json')
 
 // ********* reportData format *********
 // *************************************
-// const reportData = {
+// {
 //   providers: [],
 //   path: '',
 //   providerSessions: {
@@ -16,12 +16,13 @@ const whitelistSectors = require('../whitelist/whitelist-sectors.json')
 //   }
 // }
 
-const topLevelData = () => {
+// ********* helper function: returns keyProvider data to earthjustice *********
+// *****************************************************************************
+const keyProviderData = () => {
   let whiteProviders = whitelist
   let keyProviders = module.exports.reportData.providers.filter((p) => {
     return whiteProviders[p]
   })
-  console.log('keyProviders.length', keyProviders.length)
   let keyProvidersBySector = {}
   keyProviders.map((kp) => {
     let sector = whitelist[kp].sector
@@ -61,19 +62,15 @@ module.exports = {
       })
     })
   },
-  // TODO: can we still have a next() function? does this function continue in background?
   makeReportRequest: function (jwtClient, request, storeReportData, pageToken, res, next, options) {
-    // reset pageToken inside request body to "0"
+    // set pageToken vals
     request.reportRequests[0].pageToken = pageToken
     module.exports.pageToken = pageToken
-    if (!pageToken) { // page token is undefined
-      if (options.org === 'earthjustice') {
-        let result = topLevelData()
-        res.send(result)
-      }
-      console.log('REPORT REQUESTS FINISHED')
-    } else if (pageToken === '0') { // first request for data
+
+    if (pageToken === '0') { // i.e. first request for data
       if (options.org !== 'earthjustice') {
+        // earthjustice internal data request only needs response once all data is collected
+        // the app polls for data, so it needs a pageToken now to begin polling
         res.send({pageToken})
       }
       // empty report data objects of old report data
@@ -82,10 +79,16 @@ module.exports = {
       module.exports.reportData.providerSessions = {}
       // authorize request
       module.exports.authorize(jwtClient, request, storeReportData, res, next, options)
-    } else { // page token is not zero, but is defined
+    } else if (pageToken) { // page token > zero: i.e. there's still data to collect
       module.exports.authorize(jwtClient, request, storeReportData, res, next, options)
+    } else { // pageToken is undefined, i.e. reports are finished
+      if (options.org === 'earthjustice') {
+        // only send data if the request was for ej internal use
+        // otherwise, the front-end app will poll for data collection
+        let result = keyProviderData()
+        res.send(result)
+      }
     }
-    // next() // pass control to next route-defined function once all reports are requested
   },
   // create initial request body for data
   initRequest: function (options) {
@@ -113,8 +116,7 @@ module.exports = {
         }]
       })
     }
-    if (options.daysAgo && (typeof(options.daysAgo) === 'number')) {
-      console.log('options.daysAgo = a number')
+    if (options.daysAgo && (typeof options.daysAgo === 'number')) {
       days = options.daysAgo
     }
     const viewID = '13972743' // Google Analytics view ID
@@ -173,19 +175,14 @@ module.exports = {
         if (module.exports.reportData.providers.indexOf(provider) === -1) {
           module.exports.reportData.providers.push(provider)
         }
-        if (options.path) {
-          // todo: do we need this if statement?
-          // add path
-          if (!module.exports.reportData.path) {
-            module.exports.reportData.path = path
-          }
-          // add providerSessions
-          module.exports.reportData.providerSessions[provider] = module.exports.reportData.providerSessions[provider] || []
-          module.exports.reportData.providerSessions[provider].push(timeOnPage)
+        // add path
+        if (!module.exports.reportData.path) {
+          module.exports.reportData.path = path
         }
+        // add providerSessions
+        module.exports.reportData.providerSessions[provider] = module.exports.reportData.providerSessions[provider] || []
+        module.exports.reportData.providerSessions[provider].push(timeOnPage)
       }
     }
-    // todo: remove this? or will we use send function and next()
-    res.locals.reportData = module.exports.reportData
   }
 }

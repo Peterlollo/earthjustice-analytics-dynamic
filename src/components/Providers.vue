@@ -1,6 +1,6 @@
 <template>
   <!-- FETCHING DATA -->
-  <div v-if='fetchingProviderData || fetchingWhitelistData' class='section no-border-bottom'>
+  <div v-if='fetchingData || fetchingWhitelistData' class='section no-border-bottom'>
     <h1 class='polling'>Fetching data...</h1>
   </div>
 
@@ -12,17 +12,9 @@
 
   <!-- WHITELIST AND PROVIDER DATA SUCCESS -->
   <div v-else class='section no-border-bottom'>
-    <h2 class='polling'>{{ pollingProvidersMsg }}</h2>
+    <h2 class='polling'>{{ pollingMsg }}</h2>
     <h1 class='page-title'>Providers</h1>
-    <div class='days-ago'>
-      <h2 class='no-font-weight'>Showing data from the last {{daysAgo}} days</h2>
-      <button v-on:click='toggleDaysAgo' class='btn'>{{daysAgoBtnMsg}}</button>
-      <div v-show='showDaysAgo' class='change-days-ago'>
-        <label>From how many days back do you want to fetch data?</label>
-        <input type='number' min='1' v-model='newDaysAgo' placeholder='Example: 10'/>
-        <button v-on:click='setDaysAgoAndFetchData()' class='btn'>Fetch Data</button>
-      </div>
-    </div>
+    <DaysAgo></DaysAgo>
     <div class='list-options'>
       <button v-on:click='toggleWhitelistedProviders' class='btn'>
         {{showWhitelistedProviders ? 'Hide' : 'Show' }} Whitelisted Providers
@@ -57,21 +49,21 @@
 </template>
 
 <script>
+import DaysAgo from './DaysAgo'
 import { mapState, mapActions } from 'vuex'
+
 export default {
   name: 'Providers',
+  components: { DaysAgo },
   data: () => {
     return {
       showUnlistedProviders: false,
-      showWhitelistedProviders: false,
-      daysAgoBtnMsg: 'Edit',
-      showDaysAgo: false,
-      newDaysAgo: ''
+      showWhitelistedProviders: false
     }
   },
   computed: {
-    pollingProvidersMsg () {
-      return this.pollingProviders ? 'Still fetching more provider data...' : ''
+    pollingMsg () {
+      return this.polling ? 'Still fetching more provider data...' : ''
     },
     unlistedProviders () {
       return this.providers.filter((p) => !this.whitelist[p])
@@ -80,26 +72,16 @@ export default {
       return Object.keys(this.whitelist).sort()
     },
     ...mapState({
-      providers: state => state.provider.providers,
-      fetchingProviderData: state => state.provider.fetchingData,
+      providers: state => state.report.providers,
+      fetchingData: state => state.report.fetchingData,
       whitelist: state => state.whitelist.whitelist,
       fetchingWhitelistData: state => state.whitelist.fetchingData,
-      providerDataError: state => state.provider.error,
+      providerDataError: state => state.report.error,
       whitelistDataError: state => state.whitelist.error,
-      pollingProviders: state => state.provider.pollingProviders,
-      daysAgo: state => state.path.googleAnalyticsDaysAgo
+      polling: state => state.report.polling
     })
   },
   methods: {
-    setDaysAgoAndFetchData () {
-      this.toggleDaysAgo()
-      this.setDaysAgo(this.newDaysAgo)
-      this.getProviderData()
-    },
-    toggleDaysAgo () {
-      this.daysAgoBtnMsg = this.showDaysAgo ? 'Edit' : 'Hide'
-      this.showDaysAgo = !this.showDaysAgo
-    },
     beginAddingProvider (provider) {
       this.setProviderToAdd(provider)
       this.openModal()
@@ -112,7 +94,7 @@ export default {
     },
     getWhitelistOrProviderData () {
       if (this.providerDataError) {
-        this.getProviderData()
+        this.getReportData()
       }
       if (this.whitelistDataError) {
         this.getWhitelistData()
@@ -121,16 +103,15 @@ export default {
     ...mapActions([
       'whitelistAddProvider',
       'whitelistRemoveProvider',
-      'getProviderData',
+      'getReportData',
       'getWhitelistData',
       'openModal',
-      'setProviderToAdd',
-      'setDaysAgo'
+      'setProviderToAdd'
     ])
   },
   created () {
     if (!this.providers.length) { // no provider data in store
-      this.getProviderData()
+      this.getReportData()
     }
     if (!Object.keys(this.whitelist).length) { // no whitelist data in store
       this.getWhitelistData()
@@ -150,28 +131,6 @@ export default {
 }
 .no-border-bottom {
   border-bottom-color: transparent;
-}
-/* DAYS AGO SECTION */
-/**********/
-.days-ago {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 20px;
-}
-.days-ago .btn {
-  max-width: 200px;
-}
-.days-ago .change-days-ago {
-  margin-top: 30px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-.change-days-ago input {
-  min-width: 200px;
-}
-.change-days-ago label {
-  font-size: 2rem;
 }
 /* TITLES */
 /**********/

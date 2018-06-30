@@ -1,11 +1,11 @@
-export const path = state => state.path.path
-export const providers = state => state.path.providers
-export const providerSessions = state => state.path.providerSessions
-export const pathFromParam = state => state.path.pathFromParam
-export const pathFromParamStatus = state => state.path.pathFromParamStatus
-export const fetchingPathData = state => state.path.fetchingData
-export const pathFoundInStore = state => state.path.pathFoundInStore
-export const pathError = state => state.path.error
+export const path = state => state.report.path
+export const providers = state => state.report.providers
+export const providerSessions = state => state.report.providerSessions
+export const pathFromParam = state => state.report.pathFromParam
+export const pathFromParamStatus = state => state.report.pathFromParamStatus
+export const fetchingPathData = state => state.report.fetchingData
+export const pathFoundInStore = state => state.report.pathFoundInStore
+export const pathError = state => state.report.error
 export const whitelist = state => state.whitelist.whitelist
 export const whitelistSectors = state => state.whitelist.whitelistSectors
 export const keyProviders = (state, get) => {

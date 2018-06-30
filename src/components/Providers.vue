@@ -1,7 +1,7 @@
 <template>
   <!-- FETCHING DATA -->
-  <div v-if='fetchingProviderData || fetchingWhitelistData' class='section no-border-bottom'>
-    <h1>Fetching data...</h1>
+  <div v-if='fetchingData || fetchingWhitelistData' class='section no-border-bottom'>
+    <h1 class='polling'>Fetching data...</h1>
   </div>
 
   <!-- NETWORK FAILURE -->
@@ -12,7 +12,9 @@
 
   <!-- WHITELIST AND PROVIDER DATA SUCCESS -->
   <div v-else class='section no-border-bottom'>
+    <h2 class='polling'>{{ pollingMsg }}</h2>
     <h1 class='page-title'>Providers</h1>
+    <DaysAgo></DaysAgo>
     <div class='list-options'>
       <button v-on:click='toggleWhitelistedProviders' class='btn'>
         {{showWhitelistedProviders ? 'Hide' : 'Show' }} Whitelisted Providers
@@ -28,7 +30,6 @@
           <div>{{provider}}</div>
           <div>
             <button class='btn' v-on:click='beginAddingProvider(provider)'>Add</button>
-            <!-- <button class='btn' v-on:click='whitelistAddProvider({name: provider, sector: null})'>Add</button> -->
           </div>
         </li>
       </ul>
@@ -48,9 +49,12 @@
 </template>
 
 <script>
+import DaysAgo from './DaysAgo'
 import { mapState, mapActions } from 'vuex'
+
 export default {
   name: 'Providers',
+  components: { DaysAgo },
   data: () => {
     return {
       showUnlistedProviders: false,
@@ -58,19 +62,23 @@ export default {
     }
   },
   computed: {
+    pollingMsg () {
+      return this.polling ? 'Still fetching more provider data...' : ''
+    },
     unlistedProviders () {
       return this.providers.filter((p) => !this.whitelist[p])
     },
     whitelistedProviders () {
-      return this.providers.filter((p) => this.whitelist[p])
+      return Object.keys(this.whitelist).sort()
     },
     ...mapState({
-      providers: state => state.provider.providers,
-      fetchingProviderData: state => state.provider.fetchingData,
+      providers: state => state.report.providers,
+      fetchingData: state => state.report.fetchingData,
       whitelist: state => state.whitelist.whitelist,
       fetchingWhitelistData: state => state.whitelist.fetchingData,
-      providerDataError: state => state.provider.error,
-      whitelistDataError: state => state.whitelist.error
+      providerDataError: state => state.report.error,
+      whitelistDataError: state => state.whitelist.error,
+      polling: state => state.report.polling
     })
   },
   methods: {
@@ -86,7 +94,7 @@ export default {
     },
     getWhitelistOrProviderData () {
       if (this.providerDataError) {
-        this.getProviderData()
+        this.getReportData()
       }
       if (this.whitelistDataError) {
         this.getWhitelistData()
@@ -95,7 +103,7 @@ export default {
     ...mapActions([
       'whitelistAddProvider',
       'whitelistRemoveProvider',
-      'getProviderData',
+      'getReportData',
       'getWhitelistData',
       'openModal',
       'setProviderToAdd'
@@ -103,7 +111,7 @@ export default {
   },
   created () {
     if (!this.providers.length) { // no provider data in store
-      this.getProviderData()
+      this.getReportData()
     }
     if (!Object.keys(this.whitelist).length) { // no whitelist data in store
       this.getWhitelistData()
@@ -126,6 +134,16 @@ export default {
 }
 /* TITLES */
 /**********/
+.polling {
+  min-height: 35px;
+  animation: blinker 2s linear infinite;
+}
+
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
+}
 .page-title {
   font-weight: 700;
   font-size: 5rem;

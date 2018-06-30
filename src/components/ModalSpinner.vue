@@ -7,12 +7,11 @@ import { mapState } from 'vuex'
 export default {
   computed: {
     ...mapState({
-      fetchingProviders: state => state.provider.fetchingData,
-      fetchingPaths: state => state.path.fetchingData,
+      fetchingReport: state => state.report.fetchingData,
       fetchingWhitelist: state => state.whitelist.fetchingData
     }),
     fetchingData () {
-      return this.fetchingProviders || this.fetchingPaths || this.fetchingWhitelist
+      return this.fetchingReport || this.fetchingWhitelist
     }
   }
 }

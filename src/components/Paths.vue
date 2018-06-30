@@ -9,7 +9,12 @@
     <!-- NETWORK FAILURE -->
     <div v-else-if='pathError || whitelistError' class='section'>
       <h1>Sorry, there was an error retrieving data from server</h1>
-      <button v-on:click='getPathData' class='btn'>Fetch Data</button>
+      <button v-on:click='getReportData' class='btn'>Fetch Data</button>
+    </div>
+
+    <!-- STILL POLLING FOR DATA, NO NETWORK FAILURE, NO PARAM FAILURE, AND PATH NOT FOUND IN STORE -->
+    <div v-else-if='polling && pathFromParamStatus === "success" && !pathFoundInStore' class='section no-border-bottom'>
+      <h1 class='polling'>Data is loading</h1>
     </div>
 
     <!-- NO NETWORK FAILURE, NO PARAM FAILURE, BUT PATH NOT FOUND IN STORE -->
@@ -17,7 +22,7 @@
       <h1>Sorry, could not find that page path</h1>
       <p>{{ pathMsgError }}</p>
       <p>Or, try re-fetching the Google Analytics data</p>
-      <button v-on:click='getPathData' class='btn'>Fetch Data</button>
+      <button v-on:click='getReportData' class='btn'>Fetch Data</button>
     </div>
 
     <!-- NO NETWORK FAILURE, BUT FAILURE WITH URL PARAM -->
@@ -28,9 +33,13 @@
 
     <!-- NETWORK/PARAM/PATH_IN_STORE SUCCESS -->
     <div v-else-if='pathFromParamStatus === "success" && pathFoundInStore'>
-      <div class='section no-border-bottom'>
+      <div v-if='polling'>
+        <h1 class='polling'>Data is loading</h1>
+      </div>
+      <div class='no-border-bottom top-section'>
         <h2 class='no-font-weight'>Page</h2>
         <p class='page-title'>{{pathFromParam}}</p>
+        <DaysAgo></DaysAgo>
       </div>
       <div v-if='keySectorsSortedByProviderCount.length' class='section'>
         <div class='list-header'><h2>Key Sectors</h2><h2>Count</h2></div>
@@ -68,15 +77,20 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from 'vuex'
+import DaysAgo from './DaysAgo'
+import { mapGetters, mapActions, mapState } from 'vuex'
 export default {
   data: () => {
     return {
       pathMsgError: 'Try editing the URL in your browser\'s address bar to search for a new path.'
     }
   },
+  components: { DaysAgo },
   name: 'Paths',
   computed: {
+    ...mapState({
+      polling: state => state.report.polling
+    }),
     ...mapGetters([
       'path',
       'pathFromParam',
@@ -97,7 +111,7 @@ export default {
   },
   methods: {
     ...mapActions([
-      'getPathData',
+      'getReportData',
       'getPathFromParam',
       'getWhitelistData'
     ])
@@ -107,7 +121,7 @@ export default {
       this.getWhitelistData()
     }
     if (!this.path) { // no path data in store
-      this.getPathData()
+      this.getReportData()
     } else {
       this.getPathFromParam()
     }
@@ -127,8 +141,22 @@ export default {
 .no-border-bottom {
   border-bottom-color: transparent;
 }
+.top-section {
+  margin-top: 60px;
+  margin-bottom: 0;
+  padding-bottom: 0;
+}
 /* TITLES */
 /**********/
+.polling {
+  min-height: 35px;
+  animation: blinker 2s linear infinite;
+}
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
+}
 .page-title {
   font-weight: 700;
   font-size: 5rem;

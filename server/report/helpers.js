@@ -85,8 +85,10 @@ module.exports = {
       if (options.org === 'earthjustice') {
         // only send data if the request was for ej internal use
         // otherwise, the front-end app will poll for data collection
-        let result = keyProviderData()
-        res.send(result)
+        let report = keyProviderData()
+        let path = res.locals.path
+        let daysAgo = res.locals.daysAgo
+        res.send({path, daysAgo, report})
       }
     }
   },

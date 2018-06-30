@@ -36,7 +36,7 @@
       <div v-if='polling'>
         <h1 class='polling'>Data is loading</h1>
       </div>
-      <div class='section no-border-bottom'>
+      <div class='no-border-bottom top-section'>
         <h2 class='no-font-weight'>Page</h2>
         <p class='page-title'>{{pathFromParam}}</p>
         <DaysAgo></DaysAgo>
@@ -140,6 +140,11 @@ export default {
 }
 .no-border-bottom {
   border-bottom-color: transparent;
+}
+.top-section {
+  margin-top: 60px;
+  margin-bottom: 0;
+  padding-bottom: 0;
 }
 /* TITLES */
 /**********/

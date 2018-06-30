@@ -13,6 +13,8 @@ if (env === 'dev') {
 module.exports = {
   getDataWrapper: function (req, res, next) {
     res.locals.org = 'earthjustice'
+    res.locals.path = req.query.path || 'earthjustice.org/'
+    res.locals.daysAgo = req.query.daysAgo || 2
     next()
   },
   getData: function (req, res, next) {

@@ -17,3 +17,6 @@ googleKey.json
 *.ntvs*
 *.njsproj
 *.sln
+
+whitelist.json
+whitelist-sectors.json

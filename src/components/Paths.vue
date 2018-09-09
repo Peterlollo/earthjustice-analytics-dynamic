@@ -131,7 +131,6 @@ export default {
     }
     if (!this.path) { // no path data in store
       this.getReportData('paths')
-      // this.getReportDataWithoutPathFilter()
     } else {
       this.getPathFromParam()
     }
@@ -157,10 +156,10 @@ export default {
   padding-bottom: 0;
 }
 /* PROVIDERS */
+/**********/
 .provider-name:hover {
   cursor: pointer;
 }
-/**********/
 /* TITLES */
 /**********/
 .polling {

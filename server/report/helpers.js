@@ -182,8 +182,12 @@ module.exports = {
           module.exports.reportData.path = path
         }
         // add providerSessions
-        module.exports.reportData.providerSessions[provider] = module.exports.reportData.providerSessions[provider] || []
-        module.exports.reportData.providerSessions[provider].push(timeOnPage)
+        let providerSessions = module.exports.reportData.providerSessions
+        providerSessions[provider] = providerSessions[provider] || {}
+        providerSessions[provider]['timesOnPage'] = providerSessions[provider]['timesOnPage'] || []
+        providerSessions[provider]['timesOnPage'].push(timeOnPage)
+        providerSessions[provider]['paths'] = providerSessions[provider]['paths'] || []
+        providerSessions[provider]['paths'].push(path)
       }
     }
   }

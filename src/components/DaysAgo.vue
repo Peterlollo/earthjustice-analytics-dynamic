@@ -39,7 +39,6 @@ export default {
       'whitelistRemoveProvider',
       'getReportData',
       'getWhitelistData',
-      'openModal',
       'setProviderToAdd',
       'setDaysAgo'
     ])

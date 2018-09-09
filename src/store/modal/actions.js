@@ -7,6 +7,6 @@ export const closeModal = ({commit, dispatch}) => {
   commit(CLOSE_MODAL)
 }
 
-export const openModal = ({commit, dispatch}) => {
-  commit(OPEN_MODAL)
+export const openModal = ({commit, dispatch}, modalName) => {
+  commit(OPEN_MODAL, modalName)
 }

@@ -5,7 +5,8 @@ import {
 
 const state = {
   modalOpen: false,
-  showModalSpinner: false
+  showModalSpinner: false,
+  modalName: ''
 }
 
 const mutations = {
@@ -14,8 +15,9 @@ const mutations = {
     state.modalOpen = false
   },
 
-  [OPEN_MODAL] (state) {
+  [OPEN_MODAL] (state, name) {
     state.modalOpen = true
+    state.modalName = name
   }
 
 }

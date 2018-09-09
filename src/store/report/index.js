@@ -5,7 +5,9 @@ import {
   GET_REPORT_DATA_COMPLETE,
   GET_PATH_FROM_PARAM_SUCCESS,
   GET_PATH_FROM_PARAM_FAILURE,
-  SET_DAYS_AGO
+  SET_DAYS_AGO,
+  VIEW_PROVIDER_PAGES,
+  GET_REPORT_DATA_WITHOUT_FILTER_SUCCESS
 } from './types'
 
 const state = {
@@ -14,13 +16,19 @@ const state = {
   path: '',
   providers: [],
   providerSessions: {
-    // 'united states senate': [5, 247, 3], 'amazon': [33]
+    // 'united states senate': {
+    // // timesOnPage: [5, 247, 3],
+    // // paths: ['earthjustice.org', 'earthjustice.org/about']
+    // }
   },
   pathFromParam: '',
   pathFromParamStatus: null,
   pathFoundInStore: false,
   polling: false,
-  googleAnalyticsDaysAgo: 2
+  googleAnalyticsDaysAgo: 2,
+  viewingProviderPagesFor: '',
+  providersWithoutFilter: [],
+  providerSessionsWithoutFilter: {}
 }
 
 const mutations = {
@@ -62,6 +70,17 @@ const mutations = {
 
   [SET_DAYS_AGO] (state, daysAgo) {
     state.googleAnalyticsDaysAgo = daysAgo
+  },
+
+  [VIEW_PROVIDER_PAGES] (state, provider) {
+    state.viewingProviderPagesFor = provider
+  },
+
+  [GET_REPORT_DATA_WITHOUT_FILTER_SUCCESS] (state, { providers, path, providerSessions }) {
+    state.providersWithoutFilter = providers
+    state.providerSessionsWithoutFilter = providerSessions
+    state.error = false
+    state.fetchingData = false
   }
 
 }

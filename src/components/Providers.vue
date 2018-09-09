@@ -27,7 +27,7 @@
       <div class='list-header'><h2>Unlisted Providers</h2><h2>Whitelist Action</h2></div>
       <ul>
         <li v-for='provider in unlistedProviders' :key='provider'>
-          <div>{{provider}}</div>
+          <div class='provider-name' v-on:click='showProviderPages(provider)'>{{provider}}</div>
           <div>
             <button class='btn' v-on:click='beginAddingProvider(provider)'>Add</button>
           </div>
@@ -38,7 +38,7 @@
       <div class='list-header'><h2>Whitelisted Providers</h2><h2>Whitelist Action</h2></div>
       <ul>
         <li v-for='provider in whitelistedProviders' :key='provider'>
-          <div>{{provider}}</div>
+          <div class='provider-name' v-on:click='showProviderPages(provider)'>{{provider}}</div>
           <div>
             <button class='btn' v-on:click='whitelistRemoveProvider({name: provider})'>Remove</button>
           </div>
@@ -82,9 +82,13 @@ export default {
     })
   },
   methods: {
+    showProviderPages (provider) {
+      this.viewProviderPages(provider)
+      this.openModal('providerPages')
+    },
     beginAddingProvider (provider) {
       this.setProviderToAdd(provider)
-      this.openModal()
+      this.openModal('addProviderToWhitelist')
     },
     toggleWhitelistedProviders () {
       this.showWhitelistedProviders = !this.showWhitelistedProviders
@@ -106,7 +110,8 @@ export default {
       'getReportData',
       'getWhitelistData',
       'openModal',
-      'setProviderToAdd'
+      'setProviderToAdd',
+      'viewProviderPages'
     ])
   },
   created () {
@@ -131,6 +136,11 @@ export default {
 }
 .no-border-bottom {
   border-bottom-color: transparent;
+}
+/* Providers */
+/**********/
+.provider-name:hover {
+  cursor: pointer;
 }
 /* TITLES */
 /**********/

@@ -27,13 +27,13 @@ export const keyProvidersBySector = (state, get) => {
   })
   return result
 }
-export const keyProvidersBySectorSortedBySession = (state, get) => {
+export const keyProvidersBySectorSortedBySessionTimes = (state, get) => {
   const result = {}
   const reducer = (a, v) => a + v
   for (var sector in get.keyProvidersBySector) {
     result[sector] = get.keyProvidersBySector[sector].slice(0)
     result[sector].sort((kpA, kpB) => {
-      return get.sessionsByKeyProviders[kpB].reduce(reducer) - get.sessionsByKeyProviders[kpA].reduce(reducer)
+      return get.sessionsByKeyProviders[kpB].timesOnPage.reduce(reducer) - get.sessionsByKeyProviders[kpA].timesOnPage.reduce(reducer)
     })
   }
   return result
@@ -48,9 +48,9 @@ export const unlistedProviders = (state, get) => {
   return get.providers.filter((p) => !get.whitelist[p])
 }
 
-export const unlistedProvidersSortedBySession = (state, get) => {
+export const unlistedProvidersSortedBySessionTimes = (state, get) => {
   const reducer = (a, v) => a + v
   return get.unlistedProviders.slice(0).sort((p1, p2) => {
-    return get.providerSessions[p2].reduce(reducer) - get.providerSessions[p1].reduce(reducer)
+    return get.providerSessions[p2].timesOnPage.reduce(reducer) - get.providerSessions[p1].timesOnPage.reduce(reducer)
   })
 }

@@ -9,11 +9,10 @@ const whitelistSectors = require('../whitelist/whitelist-sectors.json')
 //   providers: [],
 //   path: '',
 //   providerSessions: {
-//     'united states senate': [5, 247, 3],
-//     'amazon': [33],
-//     <provider>: <providerSessions>
-//     where <providerSessions> is an array of session-time-lengths in seconds
-//   }
+// // // 'united states senate': {
+// // // // timesOnPage: [5, 247, 3],
+// // // // paths: ['earthjustice.org', 'earthjustice.org/about']
+// // }
 // }
 
 // ********* helper function: returns keyProvider data to earthjustice *********
@@ -182,8 +181,12 @@ module.exports = {
           module.exports.reportData.path = path
         }
         // add providerSessions
-        module.exports.reportData.providerSessions[provider] = module.exports.reportData.providerSessions[provider] || []
-        module.exports.reportData.providerSessions[provider].push(timeOnPage)
+        let providerSessions = module.exports.reportData.providerSessions
+        providerSessions[provider] = providerSessions[provider] || {}
+        providerSessions[provider]['timesOnPage'] = providerSessions[provider]['timesOnPage'] || []
+        providerSessions[provider]['timesOnPage'].push(timeOnPage)
+        providerSessions[provider]['paths'] = providerSessions[provider]['paths'] || []
+        providerSessions[provider]['paths'].push(path)
       }
     }
   }

@@ -1,7 +1,8 @@
 <template>
   <div id='app'>
     <ModalSpinner></ModalSpinner>
-    <ModalSectors v-if='modalOpen'></ModalSectors>
+    <ModalSectors v-if='modalOpen && (modalName === "addProviderToWhitelist")'></ModalSectors>
+    <ModalProviderPages v-if='modalOpen && (modalName === "providerPages")'></ModalProviderPages>
     <header id='header'>
       <a href='/'><img src='./assets/ej-logo-white.png' class='logo'></a>
     </header>
@@ -18,13 +19,15 @@
 <script>
 import {mapState} from 'vuex'
 import ModalSectors from './components/ModalSectors'
+import ModalProviderPages from './components/ModalProviderPages'
 import ModalSpinner from './components/ModalSpinner'
 export default {
   name: 'App',
-  components: {ModalSectors, ModalSpinner},
+  components: {ModalSectors, ModalSpinner, ModalProviderPages},
   computed: {
     ...mapState({
-      modalOpen: state => state.modal.modalOpen
+      modalOpen: state => state.modal.modalOpen,
+      modalName: state => state.modal.modalName
     })
   }
 }

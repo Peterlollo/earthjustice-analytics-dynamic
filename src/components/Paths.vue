@@ -55,8 +55,9 @@
         <div class='section'>
           <div class='list-header'><h2>{{sector}}</h2><h2>Seconds</h2></div>
           <ul>
-            <li v-for='provider in keyProvidersBySectorSortedBySession[sector]' :key='provider'>
-              <div>{{provider}}</div><div>{{sessionsByKeyProviders[provider].reduce((a, v) => a + v)}}</div>
+            <li v-for='provider in keyProvidersBySectorSortedBySessionTimes[sector]' :key='provider'>
+              <div class='provider-name' v-on:click='showProviderPages(provider)'>{{provider}}</div>
+              <div>{{sessionsByKeyProviders[provider].timesOnPage.reduce((a, v) => a + v)}}</div>
             </li>
           </ul>
         </div>
@@ -65,8 +66,9 @@
       <div class='section'>
         <div class='list-header'><h2>Unlisted Providers</h2><h2>Seconds</h2></div>
         <ul>
-          <li v-for='provider in unlistedProvidersSortedBySession' :key='provider'>
-            <div>{{provider}}</div><div>{{providerSessions[provider].reduce((a, v) => a + v)}}</div>
+          <li v-for='provider in unlistedProvidersSortedBySessionTimes' :key='provider'>
+            <div class='provider-name' v-on:click='showProviderPages(provider)'>{{provider}}</div>
+            <div>{{providerSessions[provider].timesOnPage.reduce((a, v) => a + v)}}</div>
           </li>
         </ul>
       </div>
@@ -101,27 +103,34 @@ export default {
       'whitelist',
       'keyProvidersBySector',
       'sessionsByKeyProviders',
-      'keyProvidersBySectorSortedBySession',
+      'keyProvidersBySectorSortedBySessionTimes',
       'keySectorsSortedByProviderCount',
       'fetchingWhitelistData',
       'whitelistError',
       'providerSessions',
-      'unlistedProvidersSortedBySession'
+      'unlistedProvidersSortedBySessionTimes'
     ])
   },
   methods: {
     ...mapActions([
       'getReportData',
       'getPathFromParam',
-      'getWhitelistData'
-    ])
+      'getWhitelistData',
+      'viewProviderPages',
+      'openModal',
+      'getReportDataWithoutPathFilter'
+    ]),
+    showProviderPages (provider) {
+      this.viewProviderPages(provider)
+      this.openModal('providerPages')
+    }
   },
   created () {
     if (!Object.keys(this.whitelist).length) { // no whitelist data in store
       this.getWhitelistData()
     }
     if (!this.path) { // no path data in store
-      this.getReportData()
+      this.getReportData('paths')
     } else {
       this.getPathFromParam()
     }
@@ -145,6 +154,11 @@ export default {
   margin-top: 60px;
   margin-bottom: 0;
   padding-bottom: 0;
+}
+/* PROVIDERS */
+/**********/
+.provider-name:hover {
+  cursor: pointer;
 }
 /* TITLES */
 /**********/

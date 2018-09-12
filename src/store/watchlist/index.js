@@ -6,7 +6,7 @@ import {
   ADD_PROVIDER_TO_WATCHLIST_FAILURE,
   REMOVE_PROVIDER_FROM_WATCHLIST_SUCCESS,
   REMOVE_PROVIDER_FROM_WATCHLIST_FAILURE,
-  SET_PROVIDER_TO_ADD
+  SET_WATCHLIST_PROVIDER_TO_ADD
 } from './types'
 
 const state = {
@@ -47,7 +47,7 @@ const mutations = {
   [REMOVE_PROVIDER_FROM_WATCHLIST_FAILURE] (state, provider) {
   },
 
-  [SET_PROVIDER_TO_ADD] (state, provider) {
+  [SET_WATCHLIST_PROVIDER_TO_ADD] (state, provider) {
     state.providerToAdd = provider
   }
 

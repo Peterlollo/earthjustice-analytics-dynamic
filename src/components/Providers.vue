@@ -24,7 +24,7 @@
       </button>
     </div>
     <div v-show='showUnlistedProviders' class='section no-border-bottom'>
-      <div class='list-header'><h2>Unlisted Providers</h2><h2>Whitelist Action</h2></div>
+      <div class='list-header'><h2>Unlisted Providers</h2><h2>Whitelist</h2></div>
       <ul>
         <li v-for='provider in unlistedProviders' :key='provider'>
           <div class='provider-name' v-on:click='showProviderPages(provider)'>{{provider}}</div>
@@ -35,10 +35,14 @@
       </ul>
     </div>
     <div v-show='showWhitelistedProviders' class='section no-border-bottom'>
-      <div class='list-header'><h2>Whitelisted Providers</h2><h2>Whitelist Action</h2></div>
+      <div class='list-header'><h2>Whitelisted Providers</h2><h2>Whitelist</h2></div>
       <ul>
         <li v-for='provider in whitelistedProviders' :key='provider'>
-          <div class='provider-name' v-on:click='showProviderPages(provider)'>{{provider}}</div>
+          <div class='provider'>
+            <span class='provider-name' v-on:click='showProviderPages(provider)'>{{provider}}</span>
+            <img v-if='isWatchlisted(provider)' class='star' src='../assets/star-gold.png' alt='star' />
+            <img v-else class='star' src='../assets/star-grey.png' alt='star' />
+          </div>
           <div>
             <button class='btn' v-on:click='whitelistRemoveProvider({name: provider})'>Remove</button>
           </div>
@@ -78,10 +82,14 @@ export default {
       fetchingWhitelistData: state => state.whitelist.fetchingData,
       providerDataError: state => state.report.error,
       whitelistDataError: state => state.whitelist.error,
-      polling: state => state.report.polling
+      polling: state => state.report.polling,
+      watchlist: state => state.watchlist.watchlist
     })
   },
   methods: {
+    isWatchlisted (provider) {
+      return this.watchlist.indexOf(provider) > -1
+    },
     showProviderPages (provider) {
       this.viewProviderPages(provider)
       this.openModal('providerPages')
@@ -139,8 +147,14 @@ export default {
 }
 /* Providers */
 /**********/
-.provider-name:hover {
+.provider:hover {
   cursor: pointer;
+}
+.star {
+  height: 30px;
+  width: 30px;
+  margin-bottom: -5px;
+  margin-left: 10px;
 }
 /* TITLES */
 /**********/

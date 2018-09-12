@@ -28,7 +28,7 @@ module.exports = {
     }
     writeFile('./server/watchlist/watchlist.json', JSON.stringify(watchlist, null, 2), res, next)
   },
-  sendWhitelist: (req, res, next) => {
+  sendWatchlist: (req, res, next) => {
     res.send({watchlist})
   }
 }

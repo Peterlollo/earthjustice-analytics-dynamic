@@ -6,7 +6,7 @@ import {
   ADD_PROVIDER_TO_WATCHLIST_FAILURE,
   REMOVE_PROVIDER_FROM_WATCHLIST_SUCCESS,
   REMOVE_PROVIDER_FROM_WATCHLIST_FAILURE,
-  SET_PROVIDER_TO_ADD
+  SET_WATCHLIST_PROVIDER_TO_ADD
 } from './types'
 
 import axios from 'axios'
@@ -49,6 +49,6 @@ export const watchlistRemoveProvider = ({commit, dispatch}, {name}) => {
     })
 }
 
-export const setProviderToAdd = ({commit}, provider) => {
-  commit(SET_PROVIDER_TO_ADD, provider)
+export const setWatchlistProviderToAdd = ({commit}, provider) => {
+  commit(SET_WATCHLIST_PROVIDER_TO_ADD, provider)
 }

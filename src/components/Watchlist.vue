@@ -1,7 +1,9 @@
 <template>
-  <h1>Provider Watchlist</h1>
-  <ul>
-  </ul>
+  <div>
+    <h1>Provider Watchlist</h1>
+    <ul>
+    </ul>
+  </div>
 </template>
 
 <script>

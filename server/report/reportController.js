@@ -9,7 +9,10 @@ if (env === 'dev') {
   key.client_email = process.env.GOOGLE_KEY_CLIENT_EMAIL
   key.private_key = process.env.GOOGLE_KEY_PRIVATE_KEY.replace(/\\n/g, '\n')
 }
-
+function onError (error) {
+  console.log("onError")
+  console.log(error)
+}
 module.exports = {
   getDataWrapper: function (req, res, next) {
     res.locals.org = 'earthjustice'
@@ -34,6 +37,7 @@ module.exports = {
     helpers.makeReportRequest(jwtClient, request, helpers.storeReportData, '0', res, next, options)
   },
   pollData: function (req, res, next) {
+    req.addListener('error', onError)
     let pageToken = helpers.pageToken
     let reportData = helpers.reportData
     res.send({pageToken, reportData})

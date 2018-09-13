@@ -27,7 +27,10 @@
       <div class='list-header'><h2>Unlisted Providers</h2><h2>Whitelist</h2></div>
       <ul>
         <li v-for='provider in unlistedProviders' :key='provider'>
-          <div class='provider-name' v-on:click='showProviderPages(provider)'>{{provider}}</div>
+          <div class='provider'>
+            <span class='provider-name' v-on:click='showProviderPages(provider)'>{{provider}}</span>
+            <WatchlistStars v-bind:provider='provider'></WatchlistStars>
+          </div>
           <div>
             <button class='btn' v-on:click='beginAddingProvider(provider)'>Add</button>
           </div>
@@ -40,8 +43,7 @@
         <li v-for='provider in whitelistedProviders' :key='provider'>
           <div class='provider'>
             <span class='provider-name' v-on:click='showProviderPages(provider)'>{{provider}}</span>
-            <img v-if='isWatchlisted(provider)' class='star' src='../assets/star-gold.png' alt='star' />
-            <img v-else class='star' src='../assets/star-grey.png' alt='star' />
+            <WatchlistStars v-bind:provider='provider'></WatchlistStars>
           </div>
           <div>
             <button class='btn' v-on:click='whitelistRemoveProvider({name: provider})'>Remove</button>
@@ -55,10 +57,11 @@
 <script>
 import DaysAgo from './DaysAgo'
 import { mapState, mapActions } from 'vuex'
+import WatchlistStars from './WatchlistStars'
 
 export default {
   name: 'Providers',
-  components: { DaysAgo },
+  components: { DaysAgo, WatchlistStars },
   data: () => {
     return {
       showUnlistedProviders: false,
@@ -87,9 +90,6 @@ export default {
     })
   },
   methods: {
-    isWatchlisted (provider) {
-      return this.watchlist.indexOf(provider) > -1
-    },
     showProviderPages (provider) {
       this.viewProviderPages(provider)
       this.openModal('providerPages')
@@ -119,7 +119,8 @@ export default {
       'getWhitelistData',
       'openModal',
       'setProviderToAdd',
-      'viewProviderPages'
+      'viewProviderPages',
+      'getWatchlistData'
     ])
   },
   created () {
@@ -128,6 +129,9 @@ export default {
     }
     if (!Object.keys(this.whitelist).length) { // no whitelist data in store
       this.getWhitelistData()
+    }
+    if (!this.watchlist.length) { // no watchlist data in store
+      this.getWatchlistData()
     }
   }
 }
@@ -147,14 +151,11 @@ export default {
 }
 /* Providers */
 /**********/
-.provider:hover {
-  cursor: pointer;
+.provider {
+  display: flex;
 }
-.star {
-  height: 30px;
-  width: 30px;
-  margin-bottom: -5px;
-  margin-left: 10px;
+.provider-name:hover {
+  cursor: pointer;
 }
 /* TITLES */
 /**********/

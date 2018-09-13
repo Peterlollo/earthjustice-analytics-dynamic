@@ -6,7 +6,7 @@ import {
   ADD_PROVIDER_TO_WATCHLIST_FAILURE,
   REMOVE_PROVIDER_FROM_WATCHLIST_SUCCESS,
   REMOVE_PROVIDER_FROM_WATCHLIST_FAILURE,
-  SET_WATCHLIST_PROVIDER_TO_ADD
+  SET_WATCHLIST_PROVIDER_TO_ADD_OR_REMOVE
 } from './types'
 
 import axios from 'axios'
@@ -25,7 +25,7 @@ export const getWatchlistData = ({commit, dispatch}) => {
     })
 }
 
-export const watchlistAddProvider = ({commit, dispatch}, {name}) => {
+export const watchlistAddProvider = ({commit, dispatch}, name) => {
   axios.post(`${process.env.API_BASE_URL}/api/watchlist/addProvider`, {name})
     .then(response => {
       let watchlist = response.data
@@ -37,7 +37,7 @@ export const watchlistAddProvider = ({commit, dispatch}, {name}) => {
     })
 }
 
-export const watchlistRemoveProvider = ({commit, dispatch}, {name}) => {
+export const watchlistRemoveProvider = ({commit, dispatch}, name) => {
   axios.post(`${process.env.API_BASE_URL}/api/watchlist/removeProvider`, {name})
     .then(response => {
       let watchlist = response.data
@@ -49,6 +49,6 @@ export const watchlistRemoveProvider = ({commit, dispatch}, {name}) => {
     })
 }
 
-export const setWatchlistProviderToAdd = ({commit}, provider) => {
-  commit(SET_WATCHLIST_PROVIDER_TO_ADD, provider)
+export const setWatchlistProviderToAddOrRemove = ({commit}, provider) => {
+  commit(SET_WATCHLIST_PROVIDER_TO_ADD_OR_REMOVE, provider)
 }

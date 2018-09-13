@@ -6,14 +6,14 @@ import {
   ADD_PROVIDER_TO_WATCHLIST_FAILURE,
   REMOVE_PROVIDER_FROM_WATCHLIST_SUCCESS,
   REMOVE_PROVIDER_FROM_WATCHLIST_FAILURE,
-  SET_WATCHLIST_PROVIDER_TO_ADD
+  SET_WATCHLIST_PROVIDER_TO_ADD_OR_REMOVE
 } from './types'
 
 const state = {
   error: false,
   fetchingData: false,
   watchlist: [],
-  providerToAdd: ''
+  providerToAddOrRemove: ''
 }
 
 const mutations = {
@@ -23,7 +23,7 @@ const mutations = {
   },
 
   [GET_WATCHLIST_DATA_SUCCESS] (state, {watchlist}) {
-    state.watchlist = watchlist
+    state.watchlist = watchlist.providers
     state.error = false
     state.fetchingData = false
   },
@@ -34,21 +34,25 @@ const mutations = {
   },
 
   [ADD_PROVIDER_TO_WATCHLIST_SUCCESS] (state, {watchlist}) {
-    state.watchlist = watchlist
+    state.watchlist = watchlist.providers
+    state.providerToAddOrRemove = ''
   },
 
   [ADD_PROVIDER_TO_WATCHLIST_FAILURE] (state, provider) {
+    state.providerToAddOrRemove = ''
   },
 
   [REMOVE_PROVIDER_FROM_WATCHLIST_SUCCESS] (state, {watchlist}) {
-    state.watchlist = watchlist
+    state.watchlist = watchlist.providers
+    state.providerToAddOrRemove = ''
   },
 
   [REMOVE_PROVIDER_FROM_WATCHLIST_FAILURE] (state, provider) {
+    state.providerToAddOrRemove = ''
   },
 
-  [SET_WATCHLIST_PROVIDER_TO_ADD] (state, provider) {
-    state.providerToAdd = provider
+  [SET_WATCHLIST_PROVIDER_TO_ADD_OR_REMOVE] (state, provider) {
+    state.providerToAddOrRemove = provider
   }
 
 }

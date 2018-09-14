@@ -9,7 +9,7 @@
     <!-- NETWORK FAILURE -->
     <div v-else-if='pathError || whitelistError' class='section'>
       <h1>Sorry, there was an error retrieving data from server</h1>
-      <button v-on:click='getReportData' class='btn'>Fetch Data</button>
+      <button v-on:click='getReportDataWithFilter' class='btn'>Fetch Data</button>
     </div>
 
     <!-- STILL POLLING FOR DATA, NO NETWORK FAILURE, NO PARAM FAILURE, AND PATH NOT FOUND IN STORE -->
@@ -22,7 +22,7 @@
       <h1>Sorry, could not find that page path</h1>
       <p>{{ pathMsgError }}</p>
       <p>Or, try re-fetching the Google Analytics data</p>
-      <button v-on:click='getReportData' class='btn'>Fetch Data</button>
+      <button v-on:click='getReportDataWithFilter' class='btn'>Fetch Data</button>
     </div>
 
     <!-- NO NETWORK FAILURE, BUT FAILURE WITH URL PARAM -->
@@ -39,28 +39,29 @@
       <div class='no-border-bottom top-section'>
         <h2 class='no-font-weight'>Page</h2>
         <p class='page-title'>{{pathFromParam}}</p>
-        <DaysAgo></DaysAgo>
+        <DaysAgo :filter='true'></DaysAgo>
       </div>
-      <div v-if='keySectorsSortedByProviderCount.length' class='section'>
+
+      <div v-if='keySectorsSortedByProviderCountWithPathFilter.length' class='section'>
         <div class='list-header'><h2>Key Sectors</h2><h2>Count</h2></div>
         <ul>
-          <li v-for='sector in keySectorsSortedByProviderCount' :key='sector'>
-            <div>{{sector}}</div><div>{{keyProvidersBySector[sector].length}}</div>
+          <li v-for='sector in keySectorsSortedByProviderCountWithPathFilter' :key='sector'>
+            <div>{{sector}}</div><div>{{keyProvidersBySectorWithPathFilter[sector].length}}</div>
           </li>
         </ul>
       </div>
       <h2 v-else>No page views by whitelisted providers</h2>
 
-      <div v-for='sector in keySectorsSortedByProviderCount' :key='sector'>
+      <div v-for='sector in keySectorsSortedByProviderCountWithPathFilter' :key='sector'>
         <div class='section'>
           <div class='list-header'><h2>{{sector}}</h2><h2>Seconds</h2></div>
           <ul>
-            <li v-for='provider in keyProvidersBySectorSortedBySessionTimes[sector]' :key='provider'>
+            <li v-for='provider in keyProvidersBySectorSortedBySessionTimesWithPathFilter[sector]' :key='provider'>
               <div class='provider'>
                 <div class='provider-name' v-on:click='showProviderPages(provider)'>{{provider}}</div>
                 <WatchlistStars v-bind:provider='provider'></WatchlistStars>
               </div>
-              <div>{{sessionsByKeyProviders[provider].timesOnPage.reduce((a, v) => a + v)}}</div>
+              <div>{{sessionsByKeyProvidersWithPathFilter[provider].timesOnPage.reduce((a, v) => a + v)}}</div>
             </li>
           </ul>
         </div>
@@ -69,12 +70,12 @@
       <div class='section'>
         <div class='list-header'><h2>Unlisted Providers</h2><h2>Seconds</h2></div>
         <ul>
-          <li v-for='provider in unlistedProvidersSortedBySessionTimes' :key='provider'>
+          <li v-for='provider in unlistedProvidersSortedBySessionTimesWithPathFilter' :key='provider'>
             <div class='provider'>
               <div class='provider-name' v-on:click='showProviderPages(provider)'>{{provider}}</div>
               <WatchlistStars v-bind:provider='provider'></WatchlistStars>
             </div>
-            <div>{{providerSessions[provider].timesOnPage.reduce((a, v) => a + v)}}</div>
+            <div>{{providerSessionsWithPathFilter[provider].timesOnPage.reduce((a, v) => a + v)}}</div>
           </li>
         </ul>
       </div>
@@ -108,24 +109,29 @@ export default {
       'pathFoundInStore',
       'pathError',
       'whitelist',
-      'keyProvidersBySector',
-      'sessionsByKeyProviders',
-      'keyProvidersBySectorSortedBySessionTimes',
-      'keySectorsSortedByProviderCount',
+      'keyProvidersBySectorWithPathFilter',
+      'sessionsByKeyProvidersWithPathFilter',
+      'keyProvidersBySectorSortedBySessionTimesWithPathFilter',
+      'keySectorsSortedByProviderCountWithPathFilter',
       'fetchingWhitelistData',
       'whitelistError',
-      'providerSessions',
-      'unlistedProvidersSortedBySessionTimes'
+      'providerSessionsWithPathFilter',
+      'unlistedProvidersSortedBySessionTimesWithPathFilter'
     ])
   },
   methods: {
+    toggleAllProviders () {
+      this.allProviders = !this.allProviders
+    },
+    getReportDataWithFilter () {
+      this.getReportData({filter: true})
+    },
     ...mapActions([
       'getReportData',
       'getPathFromParam',
       'getWhitelistData',
       'viewProviderPages',
-      'openModal',
-      'getReportDataWithoutPathFilter'
+      'openModal'
     ]),
     showProviderPages (provider) {
       this.viewProviderPages(provider)
@@ -137,7 +143,7 @@ export default {
       this.getWhitelistData()
     }
     if (!this.path) { // no path data in store
-      this.getReportData('paths')
+      this.getReportData({filter: true})
     } else {
       this.getPathFromParam()
     }

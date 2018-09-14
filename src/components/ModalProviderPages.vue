@@ -2,6 +2,7 @@
   <Modal>
     <template slot="body">
         <h1 class='title'>{{provider}}</h1>
+        <h2 v-if='fetchingData || polling' class='polling'>Fetching more data...</h2>
         <h2 class='subtitle'>Pages</h2>
         <ul>
           <li class='path' v-for='(path, i) in paths' :key='path+i'>{{path}}</li>
@@ -19,19 +20,22 @@ export default {
     ...mapState({
       provider: state => state.report.viewingProviderPagesFor,
       providerSessions: state => state.report.providerSessions,
-      providerSessionsWithoutFilter: state => state.report.providerSessionsWithoutFilter,
-      daysAgo: state => state.report.googleAnalyticsDaysAgo
+      daysAgo: state => state.report.googleAnalyticsDaysAgo,
+      fetchingData: state => state.report.fetchingData,
+      polling: state => state.report.polling
     }),
     paths () {
-      let pathname = new URL(window.location.href).pathname
-      let providerSession
-      if (pathname === '/pages') { // have to look through provider sessions unfiltered by path
-        providerSession = this.providerSessionsWithoutFilter[this.provider]
-      } else {
-        providerSession = this.providerSessions[this.provider]
-      }
+      let providerSession = this.providerSessions[this.provider]
+      let uniquePaths = []
       if (providerSession) { // check that there are any sessions available
-        return providerSession.paths
+        return providerSession.paths.filter((p) => {
+          if (uniquePaths.indexOf(p) === -1) {
+            uniquePaths.push(p)
+            return true
+          } else {
+            return false
+          }
+        })
       } else {
         return [`No pages were visited by this provider in the last ${this.daysAgo} days`]
       }
@@ -58,5 +62,15 @@ export default {
 }
 .path:last-of-type {
   border-bottom: none;
+}
+.polling {
+  min-height: 35px;
+  animation: blinker 2s linear infinite;
+}
+
+@keyframes blinker {
+  50% {
+    opacity: 0;
+  }
 }
 </style>

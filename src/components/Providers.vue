@@ -14,7 +14,7 @@
   <div v-else class='section no-border-bottom'>
     <h2 class='polling'>{{ pollingMsg }}</h2>
     <h1 class='page-title'>Providers</h1>
-    <DaysAgo></DaysAgo>
+    <DaysAgo :filter='false'></DaysAgo>
     <div class='list-options'>
       <button v-on:click='toggleWhitelistedProviders' class='btn'>
         {{showWhitelistedProviders ? 'Hide' : 'Show' }} Whitelisted Providers
@@ -38,7 +38,14 @@
       </ul>
     </div>
     <div v-show='showWhitelistedProviders' class='section no-border-bottom'>
-      <div class='list-header'><h2>Whitelisted Providers</h2><h2>Whitelist</h2></div>
+      <div class='whitelist-section-header'>
+        <h2>Whitelisted Providers</h2>
+        <div class='filter-whitelist-container'>
+          <h3 class='no-font-weight'>{{whitelistMsg}}</h3>
+          <button v-on:click='toggleWhitelist' class='btn'>Change</button>
+        </div>
+      </div>
+      <div class='list-header'><h2>Providers</h2><h2>Whitelist</h2></div>
       <ul>
         <li v-for='provider in whitelistedProviders' :key='provider'>
           <div class='provider'>
@@ -65,10 +72,14 @@ export default {
   data: () => {
     return {
       showUnlistedProviders: false,
-      showWhitelistedProviders: false
+      showWhitelistedProviders: false,
+      showAllWhitelist: false
     }
   },
   computed: {
+    whitelistMsg () {
+      return this.showAllWhitelist ? 'Showing entire Whitelist' : `Showing data from last ${this.days} days`
+    },
     pollingMsg () {
       return this.polling ? 'Still fetching more provider data...' : ''
     },
@@ -76,7 +87,13 @@ export default {
       return this.providers.filter((p) => !this.whitelist[p])
     },
     whitelistedProviders () {
-      return Object.keys(this.whitelist).sort()
+      if (this.showAllWhitelist) {
+        console.log('unfiltered length: ', Object.keys(this.whitelist).length)
+        return Object.keys(this.whitelist).sort()
+      } else {
+        console.log('filtered length: ', Object.keys(this.whitelist).filter((p) => (this.providers.indexOf(p) > -1)).length)
+        return Object.keys(this.whitelist).filter((p) => (this.providers.indexOf(p) > -1)).sort()
+      }
     },
     ...mapState({
       providers: state => state.report.providers,
@@ -86,10 +103,14 @@ export default {
       providerDataError: state => state.report.error,
       whitelistDataError: state => state.whitelist.error,
       polling: state => state.report.polling,
-      watchlist: state => state.watchlist.watchlist
+      watchlist: state => state.watchlist.watchlist,
+      days: state => state.report.googleAnalyticsDaysAgo
     })
   },
   methods: {
+    toggleWhitelist () {
+      this.showAllWhitelist = !this.showAllWhitelist
+    },
     showProviderPages (provider) {
       this.viewProviderPages(provider)
       this.openModal('providerPages')
@@ -106,7 +127,7 @@ export default {
     },
     getWhitelistOrProviderData () {
       if (this.providerDataError) {
-        this.getReportData()
+        this.getReportData({filter: false})
       }
       if (this.whitelistDataError) {
         this.getWhitelistData()
@@ -125,7 +146,7 @@ export default {
   },
   created () {
     if (!this.providers.length) { // no provider data in store
-      this.getReportData()
+      this.getReportData({filter: false})
     }
     if (!Object.keys(this.whitelist).length) { // no whitelist data in store
       this.getWhitelistData()
@@ -196,6 +217,41 @@ h1 {
 h2 {
   font-size: 2rem;
 }
+/* WHITELIST SECTION HEADER */
+/*****************************/
+.whitelist-section-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  max-width: 550px;
+}
+/* FILTER WHITELIST CONTAINER */
+/*****************************/
+.filter-whitelist-container {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+  border: solid 1px #eee;
+  padding: 20px;
+  align-items: flex-start;
+  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
+  padding-top: 0;
+}
+.filter-whitelist-container .btn {
+  max-width: 130px;
+}
+.no-font-weight {
+  font-size: 18px;
+  font-weight: 400;
+}
+@media(max-width: 767px) {
+  .filter-whitelist-container {
+    width: 250px;
+  }
+}
+/* LIST */
+/*****************************/
 .list-options {
   display: flex;
   flex-direction: row;

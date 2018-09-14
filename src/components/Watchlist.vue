@@ -15,6 +15,7 @@
     <h2 class='polling'>{{ pollingMsg }}</h2>
     <div>
       <h1 class='page-title'>Watchlist</h1>
+      <DaysAgo :filter='false'></DaysAgo>
       <ul>
         <li v-for='provider in watchlist' :key='provider'>
           <span v-on:click='showProviderPages(provider)' class='provider-name'>{{provider}}</span>
@@ -27,9 +28,10 @@
 
 <script>
 import {mapState, mapActions} from 'vuex'
+import DaysAgo from './DaysAgo'
 export default {
   name: 'Watchlist',
-  components: {},
+  components: {DaysAgo},
   data: () => {
     return {
     }
@@ -58,7 +60,7 @@ export default {
     },
     getWatchlistOrProviderData () {
       if (this.providerDataError) {
-        this.getReportData()
+        this.getReportData({filter: false})
       }
       if (this.watchlistDataError) {
         this.getWatchlistData()
@@ -75,7 +77,7 @@ export default {
   },
   created () {
     if (!this.providers.length) { // no provider data in store
-      this.getReportData()
+      this.getReportData({filter: false})
     }
     if (!this.watchlist.length) { // no watchlist data in store
       this.getWatchlistData()

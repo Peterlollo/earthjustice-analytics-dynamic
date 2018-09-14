@@ -90,7 +90,6 @@ const pollReportData = (commit, dispatch, state, page) => {
         dispatch('getPathFromParam')
         setTimeout(function () { pollReportData(commit, dispatch, state, page) }, 2000)
       } else { // all report data collected from GA
-        console.log('final response: ', response)
         commit(GET_REPORT_DATA_SUCCESS, response.data.reportData)
         commit(GET_REPORT_DATA_COMPLETE)
         dispatch('getPathFromParam')

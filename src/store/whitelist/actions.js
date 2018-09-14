@@ -16,7 +16,6 @@ export const getWhitelistData = ({commit, dispatch}) => {
   axios.get(`${process.env.API_BASE_URL}/api/whitelist/data`)
     .then(response => {
       let whitelist = response.data
-      console.log('Whitelist: ', whitelist)
       commit(GET_WHITELIST_DATA_SUCCESS, whitelist)
     })
     .catch(e => {

@@ -4,7 +4,7 @@
         <h1 class='title'>{{provider}}</h1>
         <h2 class='subtitle'>Pages</h2>
         <ul>
-          <li class='path' v-for='path in paths' :key='path'>{{path}}</li>
+          <li class='path' v-for='(path, i) in paths' :key='path+i'>{{path}}</li>
         </ul>
       </template>
   </Modal>

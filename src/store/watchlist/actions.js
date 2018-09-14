@@ -16,7 +16,6 @@ export const getWatchlistData = ({commit, dispatch}) => {
   axios.get(`${process.env.API_BASE_URL}/api/watchlist/data`)
     .then(response => {
       let watchlist = response.data
-      console.log('watchlist: ', watchlist)
       commit(GET_WATCHLIST_DATA_SUCCESS, watchlist)
     })
     .catch(e => {

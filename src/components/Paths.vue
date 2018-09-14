@@ -56,7 +56,10 @@
           <div class='list-header'><h2>{{sector}}</h2><h2>Seconds</h2></div>
           <ul>
             <li v-for='provider in keyProvidersBySectorSortedBySessionTimes[sector]' :key='provider'>
-              <div class='provider-name' v-on:click='showProviderPages(provider)'>{{provider}}</div>
+              <div class='provider'>
+                <div class='provider-name' v-on:click='showProviderPages(provider)'>{{provider}}</div>
+                <WatchlistStars v-bind:provider='provider'></WatchlistStars>
+              </div>
               <div>{{sessionsByKeyProviders[provider].timesOnPage.reduce((a, v) => a + v)}}</div>
             </li>
           </ul>
@@ -67,7 +70,10 @@
         <div class='list-header'><h2>Unlisted Providers</h2><h2>Seconds</h2></div>
         <ul>
           <li v-for='provider in unlistedProvidersSortedBySessionTimes' :key='provider'>
-            <div class='provider-name' v-on:click='showProviderPages(provider)'>{{provider}}</div>
+            <div class='provider'>
+              <div class='provider-name' v-on:click='showProviderPages(provider)'>{{provider}}</div>
+              <WatchlistStars v-bind:provider='provider'></WatchlistStars>
+            </div>
             <div>{{providerSessions[provider].timesOnPage.reduce((a, v) => a + v)}}</div>
           </li>
         </ul>
@@ -81,13 +87,14 @@
 <script>
 import DaysAgo from './DaysAgo'
 import { mapGetters, mapActions, mapState } from 'vuex'
+import WatchlistStars from './WatchlistStars'
 export default {
   data: () => {
     return {
       pathMsgError: 'Try editing the URL in your browser\'s address bar to search for a new path.'
     }
   },
-  components: { DaysAgo },
+  components: { DaysAgo, WatchlistStars },
   name: 'Paths',
   computed: {
     ...mapState({
@@ -157,6 +164,9 @@ export default {
 }
 /* PROVIDERS */
 /**********/
+.provider {
+  display: flex;
+}
 .provider-name:hover {
   cursor: pointer;
 }

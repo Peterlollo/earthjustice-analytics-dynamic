@@ -88,10 +88,8 @@ export default {
     },
     whitelistedProviders () {
       if (this.showAllWhitelist) {
-        console.log('unfiltered length: ', Object.keys(this.whitelist).length)
         return Object.keys(this.whitelist).sort()
       } else {
-        console.log('filtered length: ', Object.keys(this.whitelist).filter((p) => (this.providers.indexOf(p) > -1)).length)
         return Object.keys(this.whitelist).filter((p) => (this.providers.indexOf(p) > -1)).sort()
       }
     },

@@ -1,6 +1,6 @@
 <template>
   <div class='days-ago'>
-    <h2 class='no-font-weight'>Showing data from the last {{daysAgo}} days</h2>
+    <h2>Showing data from the last {{daysAgo}} days</h2>
     <button v-on:click='toggleDaysAgo' class='btn'>{{daysAgoBtnMsg}}</button>
     <div v-show='showDaysAgo' class='change-days-ago'>
       <label>Number of days ago</label>
@@ -19,6 +19,7 @@ export default {
       newDaysAgo: ''
     }
   },
+  props: ['filter'],
   computed: {
     ...mapState({
       daysAgo: state => state.report.googleAnalyticsDaysAgo
@@ -28,7 +29,7 @@ export default {
     setDaysAgoAndFetchData () {
       this.toggleDaysAgo()
       this.setDaysAgo(this.newDaysAgo)
-      this.getReportData()
+      this.getReportData({filter: this.filter})
     },
     toggleDaysAgo () {
       this.daysAgoBtnMsg = this.showDaysAgo ? 'Edit' : 'Hide'

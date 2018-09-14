@@ -4,7 +4,7 @@
     <ModalSectors v-if='modalOpen && (modalName === "addProviderToWhitelist")'></ModalSectors>
     <ModalProviderPages v-if='modalOpen && (modalName === "providerPages")'></ModalProviderPages>
     <header id='header'>
-      <a href='/'><img src='./assets/ej-logo-white.png' class='logo'></a>
+      <a v-on:click='changeRoute("/")'><img src='./assets/ej-logo-white.png' class='logo'></a>
     </header>
     <div class='container'>
       <div class='main-row'>
@@ -21,6 +21,7 @@ import {mapState} from 'vuex'
 import ModalSectors from './components/ModalSectors'
 import ModalProviderPages from './components/ModalProviderPages'
 import ModalSpinner from './components/ModalSpinner'
+import Router from './router'
 export default {
   name: 'App',
   components: {ModalSectors, ModalSpinner, ModalProviderPages},
@@ -29,6 +30,11 @@ export default {
       modalOpen: state => state.modal.modalOpen,
       modalName: state => state.modal.modalName
     })
+  },
+  methods: {
+    changeRoute (route) {
+      Router.push(route)
+    }
   }
 }
 </script>
@@ -97,6 +103,7 @@ h1, h2 {
 }
 a {
   color: #42b983;
+  cursor: pointer;
 }
 ul {
   list-style-type: none;

@@ -7,7 +7,7 @@ import {
   GET_PATH_FROM_PARAM_FAILURE,
   SET_DAYS_AGO,
   VIEW_PROVIDER_PAGES,
-  GET_REPORT_DATA_WITHOUT_FILTER_SUCCESS
+  GET_REPORT_DATA_SUCCESS_WITH_PATH_FILTER
 } from './types'
 
 const state = {
@@ -27,8 +27,8 @@ const state = {
   polling: false,
   googleAnalyticsDaysAgo: 2,
   viewingProviderPagesFor: '',
-  providersWithoutFilter: [],
-  providerSessionsWithoutFilter: {}
+  providersWithPathFilter: [],
+  providerSessionsWithPathFilter: {}
 }
 
 const mutations = {
@@ -40,7 +40,6 @@ const mutations = {
 
   [GET_REPORT_DATA_SUCCESS] (state, { providers, path, providerSessions }) {
     state.providers = providers
-    state.path = path
     state.providerSessions = providerSessions
     state.error = false
     state.fetchingData = false
@@ -76,9 +75,10 @@ const mutations = {
     state.viewingProviderPagesFor = provider
   },
 
-  [GET_REPORT_DATA_WITHOUT_FILTER_SUCCESS] (state, { providers, path, providerSessions }) {
-    state.providersWithoutFilter = providers
-    state.providerSessionsWithoutFilter = providerSessions
+  [GET_REPORT_DATA_SUCCESS_WITH_PATH_FILTER] (state, { providers, path, providerSessions }) {
+    state.path = path
+    state.providersWithPathFilter = providers
+    state.providerSessionsWithPathFilter = providerSessions
     state.error = false
     state.fetchingData = false
   }

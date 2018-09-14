@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import Home from '@/components/Home'
 import Providers from '@/components/Providers'
 import Paths from '@/components/Paths'
+import Watchlist from '@/components/Watchlist'
 import NotFoundComponent from '@/components/NotFoundComponent'
 
 Vue.use(Router)
@@ -29,6 +30,13 @@ export default new Router({
       name: 'paths',
       components: {
         main: Paths
+      }
+    },
+    {
+      path: '/watchlist',
+      name: 'watchlist',
+      components: {
+        main: Watchlist
       }
     },
     {

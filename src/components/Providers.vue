@@ -14,7 +14,7 @@
   <div v-else class='section no-border-bottom'>
     <h2 class='polling'>{{ pollingMsg }}</h2>
     <h1 class='page-title'>Providers</h1>
-    <DaysAgo></DaysAgo>
+    <DaysAgo :filter='false'></DaysAgo>
     <div class='list-options'>
       <button v-on:click='toggleWhitelistedProviders' class='btn'>
         {{showWhitelistedProviders ? 'Hide' : 'Show' }} Whitelisted Providers
@@ -24,10 +24,13 @@
       </button>
     </div>
     <div v-show='showUnlistedProviders' class='section no-border-bottom'>
-      <div class='list-header'><h2>Unlisted Providers</h2><h2>Whitelist Action</h2></div>
+      <div class='list-header'><h2>Unlisted Providers</h2><h2>Whitelist</h2></div>
       <ul>
         <li v-for='provider in unlistedProviders' :key='provider'>
-          <div class='provider-name' v-on:click='showProviderPages(provider)'>{{provider}}</div>
+          <div class='provider'>
+            <span class='provider-name' v-on:click='showProviderPages(provider)'>{{provider}}</span>
+            <WatchlistStars v-bind:provider='provider'></WatchlistStars>
+          </div>
           <div>
             <button class='btn' v-on:click='beginAddingProvider(provider)'>Add</button>
           </div>
@@ -35,10 +38,20 @@
       </ul>
     </div>
     <div v-show='showWhitelistedProviders' class='section no-border-bottom'>
-      <div class='list-header'><h2>Whitelisted Providers</h2><h2>Whitelist Action</h2></div>
+      <div class='whitelist-section-header'>
+        <h2>Whitelisted Providers</h2>
+        <div class='filter-whitelist-container'>
+          <h3 class='no-font-weight'>{{whitelistMsg}}</h3>
+          <button v-on:click='toggleWhitelist' class='btn'>Change</button>
+        </div>
+      </div>
+      <div class='list-header'><h2>Providers</h2><h2>Whitelist</h2></div>
       <ul>
         <li v-for='provider in whitelistedProviders' :key='provider'>
-          <div class='provider-name' v-on:click='showProviderPages(provider)'>{{provider}}</div>
+          <div class='provider'>
+            <span class='provider-name' v-on:click='showProviderPages(provider)'>{{provider}}</span>
+            <WatchlistStars v-bind:provider='provider'></WatchlistStars>
+          </div>
           <div>
             <button class='btn' v-on:click='whitelistRemoveProvider({name: provider})'>Remove</button>
           </div>
@@ -51,17 +64,22 @@
 <script>
 import DaysAgo from './DaysAgo'
 import { mapState, mapActions } from 'vuex'
+import WatchlistStars from './WatchlistStars'
 
 export default {
   name: 'Providers',
-  components: { DaysAgo },
+  components: { DaysAgo, WatchlistStars },
   data: () => {
     return {
       showUnlistedProviders: false,
-      showWhitelistedProviders: false
+      showWhitelistedProviders: false,
+      showAllWhitelist: false
     }
   },
   computed: {
+    whitelistMsg () {
+      return this.showAllWhitelist ? 'Showing entire Whitelist' : `Showing data from last ${this.days} days`
+    },
     pollingMsg () {
       return this.polling ? 'Still fetching more provider data...' : ''
     },
@@ -69,7 +87,13 @@ export default {
       return this.providers.filter((p) => !this.whitelist[p])
     },
     whitelistedProviders () {
-      return Object.keys(this.whitelist).sort()
+      if (this.showAllWhitelist) {
+        console.log('unfiltered length: ', Object.keys(this.whitelist).length)
+        return Object.keys(this.whitelist).sort()
+      } else {
+        console.log('filtered length: ', Object.keys(this.whitelist).filter((p) => (this.providers.indexOf(p) > -1)).length)
+        return Object.keys(this.whitelist).filter((p) => (this.providers.indexOf(p) > -1)).sort()
+      }
     },
     ...mapState({
       providers: state => state.report.providers,
@@ -78,10 +102,15 @@ export default {
       fetchingWhitelistData: state => state.whitelist.fetchingData,
       providerDataError: state => state.report.error,
       whitelistDataError: state => state.whitelist.error,
-      polling: state => state.report.polling
+      polling: state => state.report.polling,
+      watchlist: state => state.watchlist.watchlist,
+      days: state => state.report.googleAnalyticsDaysAgo
     })
   },
   methods: {
+    toggleWhitelist () {
+      this.showAllWhitelist = !this.showAllWhitelist
+    },
     showProviderPages (provider) {
       this.viewProviderPages(provider)
       this.openModal('providerPages')
@@ -98,7 +127,7 @@ export default {
     },
     getWhitelistOrProviderData () {
       if (this.providerDataError) {
-        this.getReportData()
+        this.getReportData({filter: false})
       }
       if (this.whitelistDataError) {
         this.getWhitelistData()
@@ -111,15 +140,19 @@ export default {
       'getWhitelistData',
       'openModal',
       'setProviderToAdd',
-      'viewProviderPages'
+      'viewProviderPages',
+      'getWatchlistData'
     ])
   },
   created () {
     if (!this.providers.length) { // no provider data in store
-      this.getReportData()
+      this.getReportData({filter: false})
     }
     if (!Object.keys(this.whitelist).length) { // no whitelist data in store
       this.getWhitelistData()
+    }
+    if (!this.watchlist.length) { // no watchlist data in store
+      this.getWatchlistData()
     }
   }
 }
@@ -139,6 +172,9 @@ export default {
 }
 /* Providers */
 /**********/
+.provider {
+  display: flex;
+}
 .provider-name:hover {
   cursor: pointer;
 }
@@ -181,6 +217,41 @@ h1 {
 h2 {
   font-size: 2rem;
 }
+/* WHITELIST SECTION HEADER */
+/*****************************/
+.whitelist-section-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  max-width: 550px;
+}
+/* FILTER WHITELIST CONTAINER */
+/*****************************/
+.filter-whitelist-container {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+  border: solid 1px #eee;
+  padding: 20px;
+  align-items: flex-start;
+  box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.2), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
+  padding-top: 0;
+}
+.filter-whitelist-container .btn {
+  max-width: 130px;
+}
+.no-font-weight {
+  font-size: 18px;
+  font-weight: 400;
+}
+@media(max-width: 767px) {
+  .filter-whitelist-container {
+    width: 250px;
+  }
+}
+/* LIST */
+/*****************************/
 .list-options {
   display: flex;
   flex-direction: row;

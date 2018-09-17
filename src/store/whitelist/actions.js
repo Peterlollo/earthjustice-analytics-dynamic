@@ -6,7 +6,8 @@ import {
   ADD_PROVIDER_TO_WHITELIST_FAILURE,
   REMOVE_PROVIDER_FROM_WHITELIST_SUCCESS,
   REMOVE_PROVIDER_FROM_WHITELIST_FAILURE,
-  SET_PROVIDER_TO_ADD
+  SET_PROVIDER_TO_ADD,
+  TOGGLE_PROVIDERS_LISTS
 } from './types'
 
 import axios from 'axios'
@@ -50,4 +51,8 @@ export const whitelistRemoveProvider = ({commit, dispatch}, {name}) => {
 
 export const setProviderToAdd = ({commit}, provider) => {
   commit(SET_PROVIDER_TO_ADD, provider)
+}
+
+export const toggleProvidersLists = ({commit}, list) => {
+  commit(TOGGLE_PROVIDERS_LISTS, list)
 }

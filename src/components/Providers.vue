@@ -71,8 +71,6 @@ export default {
   components: { DaysAgo, WatchlistStars },
   data: () => {
     return {
-      showUnlistedProviders: false,
-      showWhitelistedProviders: false,
       showAllWhitelist: false
     }
   },
@@ -102,7 +100,9 @@ export default {
       whitelistDataError: state => state.whitelist.error,
       polling: state => state.report.polling,
       watchlist: state => state.watchlist.watchlist,
-      days: state => state.report.googleAnalyticsDaysAgo
+      days: state => state.report.googleAnalyticsDaysAgo,
+      showUnlistedProviders: state => state.whitelist.showUnlistedProviders,
+      showWhitelistedProviders: state => state.whitelist.showWhitelistedProviders
     })
   },
   methods: {
@@ -114,10 +114,10 @@ export default {
       this.openModal('addProviderToWhitelist')
     },
     toggleWhitelistedProviders () {
-      this.showWhitelistedProviders = !this.showWhitelistedProviders
+      this.toggleProvidersLists('whitelist')
     },
     toggleUnlistedProviders () {
-      this.showUnlistedProviders = !this.showUnlistedProviders
+      this.toggleProvidersLists('unlisted')
     },
     getWhitelistOrProviderData () {
       if (this.providerDataError) {
@@ -135,7 +135,8 @@ export default {
       'openModal',
       'setProviderToAdd',
       'viewProviderPages',
-      'getWatchlistData'
+      'getWatchlistData',
+      'toggleProvidersLists'
     ])
   },
   created () {

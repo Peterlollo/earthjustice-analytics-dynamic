@@ -4,6 +4,7 @@ import Home from '@/components/Home'
 import Providers from '@/components/Providers'
 import Paths from '@/components/Paths'
 import Watchlist from '@/components/Watchlist'
+import ProviderSessions from '@/components/ProviderSessions'
 import NotFoundComponent from '@/components/NotFoundComponent'
 
 Vue.use(Router)
@@ -37,6 +38,13 @@ export default new Router({
       name: 'watchlist',
       components: {
         main: Watchlist
+      }
+    },
+    {
+      path: '/providersessions',
+      name: 'providersessions',
+      components: {
+        main: ProviderSessions
       }
     },
     {

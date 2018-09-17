@@ -36,6 +36,9 @@ export default {
         return [`No pages were visited by this provider in the last ${this.daysAgo} days`]
       }
     }
+  },
+  created () {
+    window.scrollTo(0, 0)
   }
 }
 </script>

@@ -28,7 +28,7 @@
       <ul>
         <li v-for='provider in unlistedProviders' :key='provider'>
           <div class='provider'>
-            <span class='provider-name' v-on:click='showProviderPages(provider)'>{{provider}}</span>
+            <span class='provider-name' v-on:click='viewProviderPages(provider)'>{{provider}}</span>
             <WatchlistStars v-bind:provider='provider'></WatchlistStars>
           </div>
           <div>
@@ -49,7 +49,7 @@
       <ul>
         <li v-for='provider in whitelistedProviders' :key='provider'>
           <div class='provider'>
-            <span class='provider-name' v-on:click='showProviderPages(provider)'>{{provider}}</span>
+            <span class='provider-name' v-on:click='viewProviderPages(provider)'>{{provider}}</span>
             <WatchlistStars v-bind:provider='provider'></WatchlistStars>
           </div>
           <div>
@@ -108,10 +108,6 @@ export default {
   methods: {
     toggleWhitelist () {
       this.showAllWhitelist = !this.showAllWhitelist
-    },
-    showProviderPages (provider) {
-      this.viewProviderPages(provider)
-      this.openModal('providerPages')
     },
     beginAddingProvider (provider) {
       this.setProviderToAdd(provider)

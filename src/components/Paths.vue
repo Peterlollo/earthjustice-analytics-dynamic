@@ -58,7 +58,7 @@
           <ul>
             <li v-for='provider in keyProvidersBySectorSortedBySessionTimesWithPathFilter[sector]' :key='provider'>
               <div class='provider'>
-                <div class='provider-name' v-on:click='showProviderPages(provider)'>{{provider}}</div>
+                <div class='provider-name' v-on:click='viewProviderPages(provider)'>{{provider}}</div>
                 <WatchlistStars v-bind:provider='provider'></WatchlistStars>
               </div>
               <div>{{sessionsByKeyProvidersWithPathFilter[provider].timesOnPage.reduce((a, v) => a + v)}}</div>
@@ -72,7 +72,7 @@
         <ul>
           <li v-for='provider in unlistedProvidersSortedBySessionTimesWithPathFilter' :key='provider'>
             <div class='provider'>
-              <div class='provider-name' v-on:click='showProviderPages(provider)'>{{provider}}</div>
+              <div class='provider-name' v-on:click='viewProviderPages(provider)'>{{provider}}</div>
               <WatchlistStars v-bind:provider='provider'></WatchlistStars>
             </div>
             <div>{{providerSessionsWithPathFilter[provider].timesOnPage.reduce((a, v) => a + v)}}</div>
@@ -130,13 +130,8 @@ export default {
       'getReportData',
       'getPathFromParam',
       'getWhitelistData',
-      'viewProviderPages',
-      'openModal'
-    ]),
-    showProviderPages (provider) {
-      this.viewProviderPages(provider)
-      this.openModal('providerPages')
-    }
+      'viewProviderPages'
+    ])
   },
   created () {
     if (!Object.keys(this.whitelist).length) { // no whitelist data in store

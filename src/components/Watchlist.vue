@@ -18,7 +18,7 @@
       <DaysAgo :filter='false'></DaysAgo>
       <ul>
         <li v-for='provider in watchlist' :key='provider'>
-          <span v-on:click='showProviderPages(provider)' class='provider-name'>{{provider}}</span>
+          <span v-on:click='viewProviderPages(provider)' class='provider-name'>{{provider}}</span>
           <img v-on:click='removeProvider(provider)' class='star size' src='../assets/star-gold.png' alt='star' />
         </li>
       </ul>
@@ -50,10 +50,6 @@ export default {
     })
   },
   methods: {
-    showProviderPages (provider) {
-      this.viewProviderPages(provider)
-      this.openModal('providerPages')
-    },
     removeProvider (provider) {
       this.setWatchlistProviderToAddOrRemove(provider)
       this.watchlistRemoveProvider(provider)
@@ -71,7 +67,6 @@ export default {
       'setWatchlistProviderToAddOrRemove',
       'getReportData',
       'getWatchlistData',
-      'openModal',
       'viewProviderPages'
     ])
   },

@@ -10,12 +10,14 @@ import {
   GET_REPORT_DATA_SUCCESS_WITH_PATH_FILTER
 } from './types'
 import axios from 'axios'
+import Router from '../../router'
 
 export const setDaysAgo = ({commit}, daysAgo) => {
   commit(SET_DAYS_AGO, daysAgo)
 }
 
 export const viewProviderPages = ({commit}, provider) => {
+  Router.push('/providersessions')
   commit(VIEW_PROVIDER_PAGES, provider)
 }
 

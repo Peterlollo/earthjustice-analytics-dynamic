@@ -1,38 +1,29 @@
-const fs = require('fs')
-const watchlistFile = './watchlist.json'
-const watchlist = require(watchlistFile)
-
-const writeFile = (fileName, json, res, next) => {
-  fs.writeFile(fileName, json, function (err) {
-    if (err) {
-      console.log(err)
-      res.sendStatus(500)
-    } else {
-      next()
-    }
-  })
-}
+const db = require('../db')
 
 module.exports = {
   addProvider: (req, res, next) => {
     const name = req.body.name
-    let providers = watchlist['providers']
-    let index = providers.indexOf(name)
-    if ((index === -1) && (name !== null)) { // only add provider to list if it isn't already in list
-      providers.push(name)
-    }
-    writeFile('./server/watchlist/watchlist.json', JSON.stringify(watchlist, null, 2), res, next)
+    const text = 'SELECT * from watchlist where provider = $1'
+    db.query(text, [name])
+      .then(res => {
+        let alreadyWatchlisted = res.rows[0]
+        if (!alreadyWatchlisted && (name !== null)) { // only add provider to list if it isn't already in list
+          db.query('INSERT INTO watchlist(provider) VALUES($1)', [name])
+            .then(result => next())
+            .catch(e => console.error(e.stack))
+        }
+      })
+      .catch(e => console.error(e.stack))
   },
   removeProvider: (req, res, next) => {
     const name = req.body.name
-    let providers = watchlist['providers']
-    let index = providers.indexOf(name)
-    if (index !== -1) { // only remove provider from list if it is already in list
-      providers.splice(index, 1)
-    }
-    writeFile('./server/watchlist/watchlist.json', JSON.stringify(watchlist, null, 2), res, next)
+    db.query('DELETE FROM watchlist WHERE provider = $1', [name])
+      .then(result => next())
+      .catch(e => console.error(e.stack))
   },
   sendWatchlist: (req, res, next) => {
-    res.send({watchlist})
+    db.query('SELECT * from watchlist')
+      .then(result => res.send(result.rows))
+      .catch(e => console.error(e))
   }
 }

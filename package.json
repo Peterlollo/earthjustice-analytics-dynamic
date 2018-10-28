@@ -13,7 +13,8 @@
     "lint": "eslint --ext .js,.vue src test/unit test/e2e/specs",
     "build": "node build/build.js",
     "postinstall": "npm run build",
-    "whitelist": "node server/whitelist/whitelist-script.js"
+    "whitelist": "node server/whitelist/whitelist-script.js",
+    "whitelistToDB": "node server/whitelist/whitelistToDB.js"
   },
   "dependencies": {
     "axios": "^0.18.0",

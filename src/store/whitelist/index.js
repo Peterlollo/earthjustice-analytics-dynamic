@@ -14,10 +14,38 @@ const state = {
   error: false,
   fetchingData: false,
   whitelist: {},
-  whitelistSectors: [],
+  whitelistSectors: [
+    'Federal Government',
+    'State Government Agencies',
+    'State Governments',
+    'Local Governments',
+    'International Government',
+    'Legal',
+    'Nonprofits',
+    'Foundations',
+    'Media',
+    'Aerospace and Transportation',
+    'Energy',
+    'Financial Services',
+    'Insurance',
+    'Pharma and Biotech and Chemicals',
+    'Technology',
+    'Consumer Goods and Services',
+    'Medical Institutions',
+    'Universities and Colleges',
+    'K-12 Schools'
+  ],
   providerToAdd: '',
   showWhitelistedProviders: false,
   showUnlistedProviders: false
+}
+
+const formatWhitelist = (list) => {
+  const newWhitelist = {}
+  list.forEach((el) => {
+    newWhitelist[el.provider] = {sector: el.sector}
+  })
+  return newWhitelist
 }
 
 const mutations = {
@@ -26,9 +54,8 @@ const mutations = {
     state.fetchingData = bool
   },
 
-  [GET_WHITELIST_DATA_SUCCESS] (state, {whitelist, whitelistSectors}) {
-    state.whitelist = whitelist
-    state.whitelistSectors = whitelistSectors.sectors
+  [GET_WHITELIST_DATA_SUCCESS] (state, whitelist) {
+    state.whitelist = formatWhitelist(whitelist)
     state.error = false
     state.fetchingData = false
   },
@@ -38,17 +65,15 @@ const mutations = {
     state.fetchingData = false
   },
 
-  [ADD_PROVIDER_TO_WHITELIST_SUCCESS] (state, {whitelist, whitelistSectors}) {
-    state.whitelist = whitelist
-    state.whitelistSectors = whitelistSectors.sectors
+  [ADD_PROVIDER_TO_WHITELIST_SUCCESS] (state, whitelist) {
+    state.whitelist = formatWhitelist(whitelist)
   },
 
   [ADD_PROVIDER_TO_WHITELIST_FAILURE] (state, provider) {
   },
 
-  [REMOVE_PROVIDER_FROM_WHITELIST_SUCCESS] (state, {whitelist, whitelistSectors}) {
-    state.whitelist = whitelist
-    state.whitelistSectors = whitelistSectors.sectors
+  [REMOVE_PROVIDER_FROM_WHITELIST_SUCCESS] (state, whitelist) {
+    state.whitelist = formatWhitelist(whitelist)
   },
 
   [REMOVE_PROVIDER_FROM_WHITELIST_FAILURE] (state, provider) {

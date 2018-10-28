@@ -13,8 +13,7 @@
     "lint": "eslint --ext .js,.vue src test/unit test/e2e/specs",
     "build": "node build/build.js",
     "postinstall": "npm run build",
-    "whitelist": "node server/whitelist/whitelist-script.js",
-    "whitelist-sectors": "node server/whitelist/whitelist-sectors-script.js"
+    "whitelist": "node server/whitelist/whitelist-script.js"
   },
   "dependencies": {
     "axios": "^0.18.0",
@@ -29,7 +28,7 @@
     "mysql2": "^1.5.3",
     "node-cron": "^1.2.1",
     "npm": "^6.0.1",
-    "pg": "^7.4.1",
+    "pg": "^7.6.0",
     "promise-mysql": "^3.2.1",
     "sequelize": "^4.37.1",
     "vue": "^2.5.2",

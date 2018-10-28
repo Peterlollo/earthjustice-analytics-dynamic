@@ -16,14 +16,20 @@ const state = {
   providerToAddOrRemove: ''
 }
 
+const formatWatchlist = (list) => {
+  return list.map((el) => {
+    return el.provider
+  })
+}
+
 const mutations = {
 
   [FETCHING_WATCHLIST_DATA] (state, bool) {
     state.fetchingData = bool
   },
 
-  [GET_WATCHLIST_DATA_SUCCESS] (state, {watchlist}) {
-    state.watchlist = watchlist.providers
+  [GET_WATCHLIST_DATA_SUCCESS] (state, watchlist) {
+    state.watchlist = formatWatchlist(watchlist)
     state.error = false
     state.fetchingData = false
   },
@@ -33,8 +39,8 @@ const mutations = {
     state.fetchingData = false
   },
 
-  [ADD_PROVIDER_TO_WATCHLIST_SUCCESS] (state, {watchlist}) {
-    state.watchlist = watchlist.providers
+  [ADD_PROVIDER_TO_WATCHLIST_SUCCESS] (state, watchlist) {
+    state.watchlist = formatWatchlist(watchlist)
     state.providerToAddOrRemove = ''
   },
 
@@ -42,8 +48,8 @@ const mutations = {
     state.providerToAddOrRemove = ''
   },
 
-  [REMOVE_PROVIDER_FROM_WATCHLIST_SUCCESS] (state, {watchlist}) {
-    state.watchlist = watchlist.providers
+  [REMOVE_PROVIDER_FROM_WATCHLIST_SUCCESS] (state, watchlist) {
+    state.watchlist = formatWatchlist(watchlist)
     state.providerToAddOrRemove = ''
   },
 

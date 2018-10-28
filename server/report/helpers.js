@@ -1,7 +1,6 @@
 const {google} = require('googleapis')
 const analytics = google.analyticsreporting('v4')
 const whitelist = require('../whitelist/whitelist.json')
-const whitelistSectors = require('../whitelist/whitelist-sectors.json')
 
 // ********* reportData format *********
 // *************************************

@@ -1,3 +1,8 @@
+// This script was used to create the initial whitelist JSON file
+// This script took the CSV information downloaded from the spreadsheet originally created 
+// for Earthjustice by Measure Creative
+// The CSV information is stored in the file entitled "all-audiences.csv"
+// The CSV data is transformed through this script into a JSON file
 var fs = require('fs')
 var csv = require('csv')
 

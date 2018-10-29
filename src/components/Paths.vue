@@ -45,14 +45,16 @@
       <div v-if='keySectorsSortedByProviderCountWithPathFilter.length' class='section'>
         <div class='list-header'><h2>Key Sectors</h2><h2>Count</h2></div>
         <ul>
-          <li v-for='sector in keySectorsSortedByProviderCountWithPathFilter' :key='sector'>
+          <!--Hide Universities, colleges and k12 as per request by Christian Anthony at Earthjustice-->
+          <li v-for='sector in keySectorsSortedByProviderCountWithPathFilter' :key='sector' v-if='notSchool(sector)'>
             <div>{{sector}}</div><div>{{keyProvidersBySectorWithPathFilter[sector].length}}</div>
           </li>
         </ul>
       </div>
       <h2 v-else>No page views by whitelisted providers</h2>
 
-      <div v-for='sector in keySectorsSortedByProviderCountWithPathFilter' :key='sector'>
+      <!--Hide Universities, colleges and k12 as per request by Christian Anthony at Earthjustice-->
+      <div v-for='sector in keySectorsSortedByProviderCountWithPathFilter' :key='sector' v-if='notSchool(sector)'>
         <div class='section'>
           <div class='list-header'><h2>{{sector}}</h2><h2>Seconds</h2></div>
           <ul>
@@ -92,7 +94,8 @@ import WatchlistStars from './WatchlistStars'
 export default {
   data: () => {
     return {
-      pathMsgError: 'Try editing the URL in your browser\'s address bar to search for a new path.'
+      pathMsgError: 'Try editing the URL in your browser\'s address bar to search for a new path.',
+      schools: ['Universities and Colleges', 'K-12 Schools']
     }
   },
   components: { DaysAgo, WatchlistStars },
@@ -125,6 +128,9 @@ export default {
     },
     getReportDataWithFilter () {
       this.getReportData({filter: true})
+    },
+    notSchool (sector) {
+      return this.schools.indexOf(sector) === -1
     },
     ...mapActions([
       'getReportData',

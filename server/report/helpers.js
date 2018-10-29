@@ -1,7 +1,18 @@
+const db = require('../db')
 const {google} = require('googleapis')
 const analytics = google.analyticsreporting('v4')
-const whitelist = require('../whitelist/whitelist.json')
-
+const whitelist = {}
+const schools = ['Universities and Colleges', 'K-12 Schools']
+db.query('SELECT * from whitelist')
+    .then(result => {
+      result.rows.forEach((el) => {
+        // filter out Universities, colleges, and k-12 as per request by Christian Anthony at earthjustice
+        if (schools.indexOf(el.sector) === -1) {
+          whitelist[el.provider] = {sector: el.sector}
+        }
+      })
+    })
+    .catch(e => console.error(e))
 // ********* reportData format *********
 // *************************************
 // {

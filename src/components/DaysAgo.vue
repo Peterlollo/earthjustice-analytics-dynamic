@@ -29,7 +29,11 @@ export default {
     setDaysAgoAndFetchData () {
       this.toggleDaysAgo()
       this.setDaysAgo(this.newDaysAgo)
-      this.getReportData({filter: this.filter})
+      if (this.filter) {
+        this.getReportDataWithFilter()
+      } else {
+        this.getReportData()
+      }
     },
     toggleDaysAgo () {
       this.daysAgoBtnMsg = this.showDaysAgo ? 'Edit' : 'Hide'
@@ -39,6 +43,7 @@ export default {
       'whitelistAddProvider',
       'whitelistRemoveProvider',
       'getReportData',
+      'getReportDataWithFilter',
       'getWhitelistData',
       'setProviderToAdd',
       'setDaysAgo'

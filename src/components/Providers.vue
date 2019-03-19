@@ -121,7 +121,7 @@ export default {
     },
     getWhitelistOrProviderData () {
       if (this.providerDataError) {
-        this.getReportData({filter: false})
+        this.getReportData()
       }
       if (this.whitelistDataError) {
         this.getWhitelistData()
@@ -141,7 +141,7 @@ export default {
   },
   created () {
     if (!this.providers.length) { // no provider data in store
-      this.getReportData({filter: false})
+      this.getReportData()
     }
     if (!Object.keys(this.whitelist).length) { // no whitelist data in store
       this.getWhitelistData()

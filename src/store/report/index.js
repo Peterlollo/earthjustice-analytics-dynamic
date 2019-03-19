@@ -8,7 +8,9 @@ import {
   GET_PATH_FROM_PARAM_FAILURE,
   SET_DAYS_AGO,
   VIEW_PROVIDER_PAGES,
-  GET_REPORT_DATA_SUCCESS_WITH_PATH_FILTER
+  GET_REPORT_DATA_SUCCESS_WITH_PATH_FILTER,
+  GET_REPORT_DATA_WITH_FILTER_FAILURE,
+  GET_REPORT_DATA_WITH_FILTER_COMPLETE
 } from './types'
 
 import { getPath } from './actions.js'
@@ -60,7 +62,18 @@ const mutations = {
     state.polling = false
   },
 
+  [GET_REPORT_DATA_WITH_FILTER_FAILURE] (state, error) {
+    state.error = true
+    state.fetchingData = false
+    state.polling = false
+  },
+
   [GET_REPORT_DATA_COMPLETE] (state, error) {
+    state.polling = false
+    state.fetchingProviderSessionData = false
+  },
+
+  [GET_REPORT_DATA_WITH_FILTER_COMPLETE] (state, error) {
     state.polling = false
   },
 
@@ -68,6 +81,7 @@ const mutations = {
     state.pathFromParam = path
     state.pathFromParamStatus = 'success'
     let pathWithSlash = `${path}/`
+    // TODO: possible that the issue here is that state.path needs a trailing slash?
     state.pathFoundInStore = ((state.path === path) || (state.path === pathWithSlash))
   },
 
@@ -86,11 +100,12 @@ const mutations = {
 
   [GET_REPORT_DATA_SUCCESS_WITH_PATH_FILTER] (state, { providers, path, providerSessions }) {
     let urlPath = getPath()
+    // TODO: possible that the issue here is that "path" needs a trailing slash?
     if (urlPath === path || `${urlPath}/` === path) { // sometimes GA returns a different earthjustice path that is not what we're searching for
       state.path = path
+      state.providersWithPathFilter = providers
+      state.providerSessionsWithPathFilter = providerSessions
     }
-    state.providersWithPathFilter = providers
-    state.providerSessionsWithPathFilter = providerSessions
     state.error = false
     state.fetchingData = false
   }

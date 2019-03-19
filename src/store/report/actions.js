@@ -48,7 +48,6 @@ export const getReportData = ({commit, state, dispatch}) => {
 export const getReportDataWithFilter = ({commit, state, dispatch}) => {
   commit(FETCHING_REPORT_DATA, true)
   let path = getPath()
-  console.log('path in getReportData ', path)
   let daysAgo = state.report.googleAnalyticsDaysAgo
   axios.get(`${process.env.API_BASE_URL}/api/reports/data-with-filter`, {params: {path, daysAgo}})
     .then(response => {

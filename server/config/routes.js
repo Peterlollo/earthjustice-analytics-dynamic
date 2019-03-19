@@ -3,19 +3,19 @@ var whitelistController = require('../whitelist/whitelistController.js')
 var watchlistController = require('../watchlist/watchlistController.js')
 
 module.exports = function (app, express) {
-  //whitelist
+  // whitelist
   app.get('/api/whitelist/data', whitelistController.sendWhitelist)
   app.post('/api/whitelist/addProvider', whitelistController.addProvider, whitelistController.sendWhitelist)
   app.post('/api/whitelist/removeProvider', whitelistController.removeProvider, whitelistController.sendWhitelist)
-  //watchlist
+  // watchlist
   app.get('/api/watchlist/data', watchlistController.sendWatchlist)
   app.post('/api/watchlist/addProvider', watchlistController.addProvider, watchlistController.sendWatchlist)
   app.post('/api/watchlist/removeProvider', watchlistController.removeProvider, watchlistController.sendWatchlist)
   // reports
   app.get('/api/reports/data', reportController.getData)
   app.get('/api/reports/pollData', reportController.pollData)
-  app.get('/api/reports/data-with-filter', reportController.getData)
-  app.get('/api/reports/pollData-with-filter', reportController.pollData)
+  app.get('/api/reports/data-with-filter', reportController.getDataWithFilter)
+  app.get('/api/reports/pollData-with-filter', reportController.pollDataWithFilter)
   // JSON data for earthjustice's internal use
   app.get('/api/reports/data/ej', reportController.getDataWrapper, reportController.getData)
 }

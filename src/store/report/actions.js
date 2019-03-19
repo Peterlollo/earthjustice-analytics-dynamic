@@ -1,5 +1,6 @@
 import {
   FETCHING_REPORT_DATA,
+  FETCHING_PROVIDER_SESSION_DATA,
   GET_REPORT_DATA_SUCCESS,
   GET_REPORT_DATA_FAILURE,
   GET_REPORT_DATA_COMPLETE,
@@ -21,13 +22,17 @@ export const viewProviderPages = ({commit}, provider) => {
   commit(VIEW_PROVIDER_PAGES, provider)
 }
 
-const getPath = () => {
+export const getPath = () => {
   let parsedUrl = new URL(window.location.href)
   return parsedUrl.searchParams.get('path')
 }
 
 export const getReportData = ({commit, state, dispatch}, options) => {
-  commit(FETCHING_REPORT_DATA, true)
+  if (options.providerSessionData) {
+    commit(FETCHING_PROVIDER_SESSION_DATA, true)
+  } else {
+    commit(FETCHING_REPORT_DATA, true)
+  }
   let path = options.filter ? getPath() : null
   let daysAgo = state.report.googleAnalyticsDaysAgo
   axios.get(`${process.env.API_BASE_URL}/api/reports/data`, {params: {path, daysAgo}})
@@ -72,7 +77,7 @@ const pollReportData = (commit, dispatch, state, options) => {
         // we want to fetch more data that is not filtered by path, in case
         // the user clicks on a provider to see what other pages that provider has visited
         if (options.filter) {
-          getReportData({commit, state, dispatch}, {filter: false})
+          getReportData({commit, state, dispatch}, {filter: false, providerSessionData: true})
         }
       }
     })

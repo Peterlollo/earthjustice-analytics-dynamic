@@ -1,5 +1,6 @@
 import {
   FETCHING_REPORT_DATA,
+  FETCHING_PROVIDER_SESSION_DATA,
   GET_REPORT_DATA_SUCCESS,
   GET_REPORT_DATA_FAILURE,
   GET_REPORT_DATA_COMPLETE,
@@ -10,9 +11,12 @@ import {
   GET_REPORT_DATA_SUCCESS_WITH_PATH_FILTER
 } from './types'
 
+import { getPath } from './actions.js'
+
 const state = {
   error: false,
   fetchingData: false,
+  fetchingProviderSessionData: false,
   path: '',
   providers: [],
   providerSessions: {
@@ -35,6 +39,11 @@ const mutations = {
 
   [FETCHING_REPORT_DATA] (state, bool) {
     state.fetchingData = bool
+    state.polling = bool
+  },
+
+  [FETCHING_PROVIDER_SESSION_DATA] (state, bool) {
+    state.fetchingProviderSessionData = bool
     state.polling = bool
   },
 
@@ -76,7 +85,10 @@ const mutations = {
   },
 
   [GET_REPORT_DATA_SUCCESS_WITH_PATH_FILTER] (state, { providers, path, providerSessions }) {
-    state.path = path
+    let urlPath = getPath()
+    if (urlPath === path || `${urlPath}/` === path) { // sometimes GA returns a different earthjustice path that is not what we're searching for
+      state.path = path
+    }
     state.providersWithPathFilter = providers
     state.providerSessionsWithPathFilter = providerSessions
     state.error = false

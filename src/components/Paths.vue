@@ -126,14 +126,11 @@ export default {
     toggleAllProviders () {
       this.allProviders = !this.allProviders
     },
-    getReportDataWithFilter () {
-      this.getReportData({filter: true})
-    },
     notSchool (sector) {
       return this.schools.indexOf(sector) === -1
     },
     ...mapActions([
-      'getReportData',
+      'getReportDataWithFilter',
       'getPathFromParam',
       'getWhitelistData',
       'viewProviderPages'
@@ -144,7 +141,7 @@ export default {
       this.getWhitelistData()
     }
     if (!this.path) { // no path data in store
-      this.getReportData({filter: true})
+      this.getReportDataWithFilter()
     } else {
       this.getPathFromParam()
     }

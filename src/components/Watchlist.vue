@@ -56,7 +56,7 @@ export default {
     },
     getWatchlistOrProviderData () {
       if (this.providerDataError) {
-        this.getReportData({filter: false})
+        this.getReportData()
       }
       if (this.watchlistDataError) {
         this.getWatchlistData()
@@ -72,7 +72,7 @@ export default {
   },
   created () {
     if (!this.providers.length) { // no provider data in store
-      this.getReportData({filter: false})
+      this.getReportData()
     }
     if (!this.watchlist.length) { // no watchlist data in store
       this.getWatchlistData()

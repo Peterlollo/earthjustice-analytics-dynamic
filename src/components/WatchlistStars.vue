@@ -1,6 +1,6 @@
 <template>
   <div id='WatchlistStars'>
-    <div class='spinner size' v-if='polling || (inProcess === provider)'></div>
+    <div class='spinner size' v-if='inProcess === provider'></div>
     <img v-else-if='isWatchlisted(provider)' v-on:click='removeProvider(provider)' class='star size' src='../assets/star-gold.png' alt='star' />
     <img v-else class='star size' v-on:click='addProvider(provider)' src='../assets/star-grey.png' alt='star' />
   </div>

@@ -17,7 +17,7 @@ export default {
       provider: state => state.report.viewingProviderPagesFor,
       providerSessions: state => state.report.providerSessions,
       daysAgo: state => state.report.googleAnalyticsDaysAgo,
-      fetchingData: state => state.report.fetchingData,
+      fetchingData: state => state.report.fetchingProviderSessionData,
       polling: state => state.report.polling
     }),
     paths () {

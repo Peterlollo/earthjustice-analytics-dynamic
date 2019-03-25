@@ -9,12 +9,19 @@
 
 <script>
 import Router from '../router'
+import { mapActions } from 'vuex'
 export default {
   name: 'Home',
   methods: {
     changeRoute (route) {
       Router.push(route)
-    }
+    },
+    ...mapActions([
+      'getReportData'
+    ])
+  },
+  created () {
+    this.getReportData()
   }
 }
 </script>

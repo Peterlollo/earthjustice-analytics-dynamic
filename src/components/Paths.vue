@@ -2,6 +2,7 @@
   <div>
 
     <!-- FETCHING DATA -->
+    <!-- TODO: fetchingPathData not currently being used. Should it? -->
     <div v-if='fetchingPathData || fetchingWhitelistData' class='section no-border-bottom'>
       <h1>Fetching data...</h1>
     </div>
@@ -9,21 +10,21 @@
     <!-- NETWORK FAILURE -->
     <div v-else-if='pathError || whitelistError' class='section'>
       <h1>Sorry, there was an error retrieving data from server</h1>
-      <button v-on:click='getReportDataWithFilter' class='btn'>Fetch Data</button>
+      <button v-on:click='getReportData' class='btn'>Fetch Data</button>
     </div>
 
-    <!-- STILL POLLING FOR DATA, NO NETWORK FAILURE, NO PARAM FAILURE, AND PATH NOT FOUND IN STORE -->
-    <div v-else-if='polling && pathFromParamStatus === "success" && !pathFoundInStore' class='section no-border-bottom'>
+    <!-- STILL POLLING FOR DATA, NO NETWORK FAILURE, NO PARAM FAILURE, BUT NO PROVIDERS IN STORE -->
+    <!-- <div v-else-if='polling && pathFromParamStatus === "success" && !providers.length' class='section no-border-bottom'>
       <h1 class='polling'>Data is loading</h1>
-    </div>
+    </div> -->
 
     <!-- NO NETWORK FAILURE, NO PARAM FAILURE, BUT PATH NOT FOUND IN STORE -->
-    <div v-else-if='pathFromParamStatus === "success" && !pathFoundInStore' class='section no-border-bottom'>
+    <!-- <div v-else-if='pathFromParamStatus === "success" && !pathFoundInStore' class='section no-border-bottom'>
       <h1>Sorry, could not find that page path</h1>
       <p>{{ pathMsgError }}</p>
       <p>Or, try re-fetching the Google Analytics data</p>
-      <button v-on:click='getReportDataWithFilter' class='btn'>Fetch Data</button>
-    </div>
+      <button v-on:click='getReportData' class='btn'>Fetch Data</button>
+    </div> -->
 
     <!-- NO NETWORK FAILURE, BUT FAILURE WITH URL PARAM -->
     <div v-else-if='pathFromParamStatus === "fail"' class='section no-border-bottom'>
@@ -32,14 +33,14 @@
     </div>
 
     <!-- NETWORK/PARAM/PATH_IN_STORE SUCCESS -->
-    <div v-else-if='pathFromParamStatus === "success" && pathFoundInStore'>
+    <div v-else-if='pathFromParamStatus === "success"'>
       <div v-if='polling'>
         <h1 class='polling'>Data is loading</h1>
       </div>
       <div class='no-border-bottom top-section'>
         <h2 class='no-font-weight'>Page</h2>
         <p class='page-title'>{{pathFromParam}}</p>
-        <DaysAgo :filter='true'></DaysAgo>
+        <DaysAgo></DaysAgo>
       </div>
 
       <div v-if='keySectorsSortedByProviderCountWithPathFilter.length' class='section'>
@@ -63,7 +64,7 @@
                 <div class='provider-name' v-on:click='viewProviderPages(provider)'>{{provider}}</div>
                 <WatchlistStars v-bind:provider='provider'></WatchlistStars>
               </div>
-              <div>{{sessionsByKeyProvidersWithPathFilter[provider].timesOnPage.reduce((a, v) => a + v)}}</div>
+              <div>{{ getSeconds(sessionsByKeyProvidersWithPathFilter[provider]) }}</div>
             </li>
           </ul>
         </div>
@@ -77,7 +78,7 @@
               <div class='provider-name' v-on:click='viewProviderPages(provider)'>{{provider}}</div>
               <WatchlistStars v-bind:provider='provider'></WatchlistStars>
             </div>
-            <div>{{providerSessionsWithPathFilter[provider].timesOnPage.reduce((a, v) => a + v)}}</div>
+            <div>{{ getSeconds(providerSessionsWithPathFilter[provider]) }}</div>
           </li>
         </ul>
       </div>
@@ -105,11 +106,11 @@ export default {
       polling: state => state.report.polling
     }),
     ...mapGetters([
+      'providers',
       'path',
       'pathFromParam',
       'pathFromParamStatus',
       'fetchingPathData',
-      'pathFoundInStore',
       'pathError',
       'whitelist',
       'keyProvidersBySectorWithPathFilter',
@@ -123,6 +124,10 @@ export default {
     ])
   },
   methods: {
+    getSeconds (object) {
+      let pathWithSlash = `${this.path}/`
+      return object[this.path] || object[pathWithSlash]
+    },
     toggleAllProviders () {
       this.allProviders = !this.allProviders
     },
@@ -130,21 +135,23 @@ export default {
       return this.schools.indexOf(sector) === -1
     },
     ...mapActions([
-      'getReportDataWithFilter',
+      'getReportData',
       'getPathFromParam',
       'getWhitelistData',
       'viewProviderPages'
     ])
   },
   created () {
+    this.getPathFromParam()
+    this.getReportData()
     if (!Object.keys(this.whitelist).length) { // no whitelist data in store
       this.getWhitelistData()
     }
-    if (!this.path) { // no path data in store
-      this.getReportDataWithFilter()
-    } else {
-      this.getPathFromParam()
-    }
+    // if (!this.path) { // no path data in store
+    //   this.getReportDataWithFilter()
+    // } else {
+    //   this.getPathFromParam()
+    // }
   }
 }
 </script>

@@ -14,8 +14,6 @@ module.exports = function (app, express) {
   // reports
   app.get('/api/reports/data', reportController.getData)
   app.get('/api/reports/pollData', reportController.pollData)
-  app.get('/api/reports/data-with-filter', reportController.getDataWithFilter)
-  app.get('/api/reports/pollData-with-filter', reportController.pollDataWithFilter)
   // JSON data for earthjustice's internal use
   app.get('/api/reports/data/ej', reportController.getDataWrapper, reportController.getData)
 }

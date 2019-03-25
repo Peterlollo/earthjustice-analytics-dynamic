@@ -37,27 +37,5 @@ module.exports = {
     let pageToken = helpers.pageToken
     let reportData = helpers.reportData
     res.send({pageToken, reportData})
-  },
-  getDataWithFilter: function (req, res, next) {
-    const jwtClient = new google.auth.JWT(
-      key.client_email,
-      null,
-      key.private_key,
-      ['https://www.googleapis.com/auth/analytics.readonly'], // an array of auth scopes
-      null
-    )
-    const org = res.locals.org
-    const path = req.query.path
-    const daysAgo = Number(req.query.daysAgo)
-    const withFilter = true
-    const options = {path, daysAgo, org, withFilter}
-    const request = helpers.initRequest(options)
-    // initialize first report request with pageToken set to '0'
-    helpers.makeReportRequest(jwtClient, request, helpers.storeReportData, '0', res, next, options)
-  },
-  pollDataWithFilter: function (req, res, next) {
-    let pageToken = helpers.pageTokenWithFilter
-    let reportData = helpers.reportDataWithFilter
-    res.send({pageToken, reportData})
   }
 }

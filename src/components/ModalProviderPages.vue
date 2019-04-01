@@ -26,16 +26,8 @@ export default {
     }),
     paths () {
       let providerSession = this.providerSessions[this.provider]
-      let uniquePaths = []
       if (providerSession) { // check that there are any sessions available
-        return providerSession.paths.filter((p) => {
-          if (uniquePaths.indexOf(p) === -1) {
-            uniquePaths.push(p)
-            return true
-          } else {
-            return false
-          }
-        })
+        return Object.keys(providerSession)
       } else {
         return [`No pages were visited by this provider in the last ${this.daysAgo} days`]
       }

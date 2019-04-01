@@ -4,32 +4,38 @@ const analytics = google.analyticsreporting('v4')
 const whitelist = {}
 const schools = ['Universities and Colleges', 'K-12 Schools']
 db.query('SELECT * from whitelist')
-    .then(result => {
-      result.rows.forEach((el) => {
-        // filter out Universities, colleges, and k-12 as per request by Christian Anthony at earthjustice
-        if (schools.indexOf(el.sector) === -1) {
-          whitelist[el.provider] = {sector: el.sector}
-        }
-      })
+  .then(result => {
+    result.rows.forEach((el) => {
+      // filter out Universities, colleges, and k-12 as per request by Christian Anthony at earthjustice
+      if (schools.indexOf(el.sector) === -1) {
+        whitelist[el.provider] = {sector: el.sector}
+      }
     })
-    .catch(e => console.error(e))
-// ********* reportData format *********
-// *************************************
-// {
-//   providers: [],
-//   path: '',
-//   providerSessions: {
-// // // 'united states senate': {
-// // // // timesOnPage: [5, 247, 3],
-// // // // paths: ['earthjustice.org', 'earthjustice.org/about']
-// // }
-// }
+  })
+  .catch(e => console.error(e))
 
 // ********* helper function: returns keyProvider data to earthjustice *********
 // *****************************************************************************
-const keyProviderData = () => {
+const keyProviderData = (requestPath) => {
   let whiteProviders = whitelist
-  let keyProviders = module.exports.reportData.providers.filter((p) => {
+  let rows = module.exports.rows
+  let reportProviders = []
+  let providerSessions = {}
+  for (let i = 0; i < rows.length; i++) {
+    const rowDimensions = rows[i].dimensions
+    const provider = rowDimensions[0]
+    const path = rowDimensions[1]
+    // add providerSessions
+    providerSessions[provider] = providerSessions[provider] || {}
+    providerSessions[provider][path] = true
+    if (reportProviders.indexOf(provider) === -1 && providerSessions[provider][requestPath]) {
+      // provider is not already added
+      // and provider has visited the path that was sent in the request
+      reportProviders.push(provider)
+    }
+  }
+
+  let keyProviders = reportProviders.filter((p) => {
     return whiteProviders[p]
   })
   let keyProvidersBySector = {}
@@ -50,17 +56,8 @@ const keyProviderData = () => {
 
 module.exports = {
   pageToken: undefined,
-  pageTokenWithFilter: undefined,
-  reportData: {
-    providers: [],
-    path: '',
-    providerSessions: {}
-  },
-  reportDataWithFilter: {
-    providers: [],
-    path: '',
-    providerSessions: {}
-  },
+  rows: [],
+  reportData: {},
   authorize: function (jwtClient, request, storeReportData, res, next, options) {
     jwtClient.authorize(function (err, tokens) {
       if (err) {
@@ -80,28 +77,16 @@ module.exports = {
   makeReportRequest: function (jwtClient, request, storeReportData, pageToken, res, next, options) {
     // set pageToken vals
     request.reportRequests[0].pageToken = pageToken
-    if (options.withFilter) {
-      module.exports.pageTokenWithFilter = pageToken
-    } else {
-      module.exports.pageToken = pageToken
-    }
+    module.exports.pageToken = pageToken
     if (pageToken === '0') { // i.e. first request for data
       if (options.org !== 'earthjustice') {
         // earthjustice internal data request only needs response once all data is collected
         // the app polls for data, so it needs a pageToken now to begin polling
         res.send({pageToken})
       }
-      if (options.withFilter) {
-        // empty report data objects of old report data
-        module.exports.reportDataWithFilter.providers = []
-        module.exports.reportDataWithFilter.path = ''
-        module.exports.reportDataWithFilter.providerSessions = {}
-      } else {
-        // empty report data objects of old report data
-        module.exports.reportData.providers = []
-        module.exports.reportData.path = ''
-        module.exports.reportData.providerSessions = {}
-      }
+      // empty report data objects of old report data
+      module.exports.reportData = {}
+      module.exports.rows = []
       // authorize request
       module.exports.authorize(jwtClient, request, storeReportData, res, next, options)
     } else if (pageToken) { // page token > zero: i.e. there's still data to collect
@@ -110,8 +95,8 @@ module.exports = {
       if (options.org === 'earthjustice') {
         // only send data if the request was for ej internal use
         // otherwise, the front-end app will poll for data collection
-        let report = keyProviderData()
         let path = res.locals.path
+        let report = keyProviderData(path)
         let daysAgo = res.locals.daysAgo
         res.send({path, daysAgo, report})
       }
@@ -120,7 +105,7 @@ module.exports = {
   // create initial request body for data
   initRequest: function (options) {
     let days = 2
-    const metrics = []
+    const metrics = [{expression: 'ga:timeOnPage'}]
     const dimensionFilterClauses = [
       {
         'filters': [
@@ -133,16 +118,6 @@ module.exports = {
         ]
       }
     ]
-    if (options.path) {
-      metrics.push({expression: 'ga:timeOnPage'})
-      dimensionFilterClauses.push({
-        'filters': [{
-          'dimensionName': 'ga:pagePath',
-          'operator': 'IN_LIST',
-          'expressions': [options.path, `${options.path}/`]
-        }]
-      })
-    }
     if (options.daysAgo && (typeof options.daysAgo === 'number')) {
       days = options.daysAgo
     }
@@ -167,9 +142,6 @@ module.exports = {
             },
             {
               name: 'ga:pagePath'
-            },
-            {
-              name: 'ga:date'
             }
           ],
           'dimensionFilterClauses': dimensionFilterClauses
@@ -180,58 +152,9 @@ module.exports = {
   },
   // store received GA report inside res.locals
   storeReportData: function (report, res, options) {
-    // report headers
-    const dimensions = report.columnHeader.dimensions
-    const metrics = report.columnHeader.metricHeader.metricHeaderEntries.map((m) => m.name)
-
-    // indices of variables within rows
-    const providerIndex = dimensions.indexOf('ga:networkLocation')
-    const pathIndex = dimensions.indexOf('ga:pagePath')
-    const timeOnPageIndex = metrics.indexOf('ga:timeOnPage')
-    const rows = report.data.rows
-
-    // add report data to DB
-    if (rows) {
-      for (let i = 0; i < rows.length; i++) {
-        const rowDimensions = rows[i].dimensions
-        const provider = rowDimensions[providerIndex]
-        const path = rowDimensions[pathIndex]
-        const rowMetrics = rows[i].metrics[0].values
-        const timeOnPage = Number(rowMetrics[timeOnPageIndex])
-        if (options.withFilter) {
-          // add providers
-          if (module.exports.reportDataWithFilter.providers.indexOf(provider) === -1) {
-            module.exports.reportDataWithFilter.providers.push(provider)
-          }
-          // add path
-          if (!module.exports.reportDataWithFilter.path) {
-            module.exports.reportDataWithFilter.path = path
-          }
-          // add providerSessions
-          let providerSessions = module.exports.reportDataWithFilter.providerSessions
-          providerSessions[provider] = providerSessions[provider] || {}
-          providerSessions[provider]['timesOnPage'] = providerSessions[provider]['timesOnPage'] || []
-          providerSessions[provider]['timesOnPage'].push(timeOnPage)
-          providerSessions[provider]['paths'] = providerSessions[provider]['paths'] || []
-          providerSessions[provider]['paths'].push(path)
-        } else {
-          // add providers
-          if (module.exports.reportData.providers.indexOf(provider) === -1) {
-            module.exports.reportData.providers.push(provider)
-          }
-          // add path
-          if (!module.exports.reportData.path) {
-            module.exports.reportData.path = path
-          }
-          // add providerSessions
-          let providerSessions = module.exports.reportData.providerSessions
-          providerSessions[provider] = providerSessions[provider] || {}
-          providerSessions[provider]['timesOnPage'] = providerSessions[provider]['timesOnPage'] || []
-          providerSessions[provider]['timesOnPage'].push(timeOnPage)
-          providerSessions[provider]['paths'] = providerSessions[provider]['paths'] || []
-          providerSessions[provider]['paths'].push(path)
-        }
-      }
+    module.exports.reportData = report
+    if (report.data && report.data.rows) {
+      module.exports.rows = module.exports.rows.concat(report.data.rows)
     }
   }
 }

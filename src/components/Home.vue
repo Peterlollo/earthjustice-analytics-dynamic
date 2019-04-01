@@ -9,11 +9,25 @@
 
 <script>
 import Router from '../router'
+import { mapActions, mapState } from 'vuex'
 export default {
   name: 'Home',
+  computed: {
+    ...mapState({
+      providers: state => state.report.providers
+    })
+  },
   methods: {
     changeRoute (route) {
       Router.push(route)
+    },
+    ...mapActions([
+      'getReportData'
+    ])
+  },
+  created () {
+    if (!this.providers.length) { // no provider data in store
+      this.getReportData()
     }
   }
 }

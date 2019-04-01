@@ -19,7 +19,6 @@ export default {
       newDaysAgo: ''
     }
   },
-  props: ['filter'],
   computed: {
     ...mapState({
       daysAgo: state => state.report.googleAnalyticsDaysAgo
@@ -29,11 +28,7 @@ export default {
     setDaysAgoAndFetchData () {
       this.toggleDaysAgo()
       this.setDaysAgo(this.newDaysAgo)
-      if (this.filter) {
-        this.getReportDataWithFilter()
-      } else {
-        this.getReportData()
-      }
+      this.getReportData()
     },
     toggleDaysAgo () {
       this.daysAgoBtnMsg = this.showDaysAgo ? 'Edit' : 'Hide'
@@ -43,7 +38,6 @@ export default {
       'whitelistAddProvider',
       'whitelistRemoveProvider',
       'getReportData',
-      'getReportDataWithFilter',
       'getWhitelistData',
       'setProviderToAdd',
       'setDaysAgo'

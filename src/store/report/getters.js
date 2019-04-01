@@ -1,12 +1,40 @@
-export const path = state => state.report.path
+const hasPath = (object, path) => {
+  if (!object) {
+    return false
+  }
+  let pathWithSlash = `${path}/`
+  if (Array.isArray(object)) {
+    return (object.indexOf(path) > -1 || object.indexOf(pathWithSlash) > -1)
+  } else {
+    return (object[path] || object[pathWithSlash])
+  }
+}
+
+const valAtPath = (object, path) => {
+  if (!object) {
+    return false
+  }
+  let pathWithSlash = `${path}/`
+  return (object[path] || object[pathWithSlash] || 0)
+}
+
+export const path = state => state.report.pathFromParam
 export const providers = state => state.report.providers
 export const providerSessions = state => state.report.providerSessions
-export const providersWithPathFilter = state => state.report.providersWithPathFilter
-export const providerSessionsWithPathFilter = state => state.report.providerSessionsWithPathFilter
+export const providerSessionsWithPathFilter = (state, get) => {
+  // returns all pages visited by a provider, *IF* that provider has visited the path in current url's path param
+  let result = {}
+  Object.keys(get.providerSessions).forEach((p) => {
+    if (hasPath(get.providerSessions[p], get.path)) {
+    // providerSessions includes a session for this provider on current url param path
+      result[p] = get.providerSessions[p]
+    }
+  })
+  return result
+}
+export const providersWithPathFilter = (state, get) => Object.keys(get.providerSessionsWithPathFilter)
 export const pathFromParam = state => state.report.pathFromParam
 export const pathFromParamStatus = state => state.report.pathFromParamStatus
-export const fetchingPathData = state => state.report.fetchingData
-export const pathFoundInStore = state => state.report.pathFoundInStore
 export const pathError = state => state.report.error
 export const whitelist = state => state.whitelist.whitelist
 export const whitelistSectors = state => state.whitelist.whitelistSectors
@@ -32,11 +60,10 @@ export const keyProvidersBySector = (state, get) => {
 }
 export const keyProvidersBySectorSortedBySessionTimes = (state, get) => {
   const result = {}
-  const reducer = (a, v) => a + v
   for (var sector in get.keyProvidersBySector) {
     result[sector] = get.keyProvidersBySector[sector].slice(0)
     result[sector].sort((kpA, kpB) => {
-      return get.sessionsByKeyProviders[kpB].timesOnPage.reduce(reducer) - get.sessionsByKeyProviders[kpA].timesOnPage.reduce(reducer)
+      return valAtPath(get.sessionsByKeyProviders[kpB], get.path) - valAtPath(get.sessionsByKeyProviders[kpA], get.path)
     })
   }
   return result
@@ -52,9 +79,8 @@ export const unlistedProviders = (state, get) => {
 }
 
 export const unlistedProvidersSortedBySessionTimes = (state, get) => {
-  const reducer = (a, v) => a + v
   return get.unlistedProviders.slice(0).sort((p1, p2) => {
-    return get.providerSessions[p2].timesOnPage.reduce(reducer) - get.providerSessions[p1].timesOnPage.reduce(reducer)
+    return valAtPath(get.providerSessions[p2], get.path) - valAtPath(get.providerSessions[p1], get.path)
   })
 }
 
@@ -82,11 +108,10 @@ export const keyProvidersBySectorWithPathFilter = (state, get) => {
 }
 export const keyProvidersBySectorSortedBySessionTimesWithPathFilter = (state, get) => {
   const result = {}
-  const reducer = (a, v) => a + v
   for (var sector in get.keyProvidersBySectorWithPathFilter) {
     result[sector] = get.keyProvidersBySectorWithPathFilter[sector].slice(0)
     result[sector].sort((kpA, kpB) => {
-      return get.sessionsByKeyProvidersWithPathFilter[kpB].timesOnPage.reduce(reducer) - get.sessionsByKeyProvidersWithPathFilter[kpA].timesOnPage.reduce(reducer)
+      return valAtPath(get.providerSessions[kpB], get.path) - valAtPath(get.providerSessions[kpA], get.path)
     })
   }
   return result
@@ -102,8 +127,7 @@ export const unlistedProvidersWithPathFilter = (state, get) => {
 }
 
 export const unlistedProvidersSortedBySessionTimesWithPathFilter = (state, get) => {
-  const reducer = (a, v) => a + v
   return get.unlistedProvidersWithPathFilter.slice(0).sort((p1, p2) => {
-    return get.providerSessionsWithPathFilter[p2].timesOnPage.reduce(reducer) - get.providerSessionsWithPathFilter[p1].timesOnPage.reduce(reducer)
+    return valAtPath(get.providerSessions[p2], get.path) - valAtPath(get.providerSessions[p1], get.path)
   })
 }

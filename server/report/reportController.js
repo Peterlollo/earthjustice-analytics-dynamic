@@ -26,7 +26,6 @@ module.exports = {
       null
     )
     const org = res.locals.org
-    // TODO; shouldn't this backup check res.locals?
     const path = req.query.path
     const daysAgo = Number(req.query.daysAgo)
     const options = {path, daysAgo, org}

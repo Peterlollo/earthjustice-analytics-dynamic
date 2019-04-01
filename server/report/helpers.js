@@ -16,7 +16,7 @@ db.query('SELECT * from whitelist')
 
 // ********* helper function: returns keyProvider data to earthjustice *********
 // *****************************************************************************
-const keyProviderData = (path) => {
+const keyProviderData = (requestPath) => {
   let whiteProviders = whitelist
   let rows = module.exports.rows
   let reportProviders = []
@@ -28,7 +28,7 @@ const keyProviderData = (path) => {
     // add providerSessions
     providerSessions[provider] = providerSessions[provider] || {}
     providerSessions[provider][path] = true
-    if (reportProviders.indexOf(provider) === -1 && providerSessions[provider][path]) {
+    if (reportProviders.indexOf(provider) === -1 && providerSessions[provider][requestPath]) {
       // provider is not already added
       // and provider has visited the path that was sent in the request
       reportProviders.push(provider)

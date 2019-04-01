@@ -15,7 +15,7 @@
     <h2 class='polling'>{{ pollingMsg }}</h2>
     <div>
       <h1 class='page-title'>Watchlist</h1>
-      <DaysAgo :filter='false'></DaysAgo>
+      <DaysAgo></DaysAgo>
       <ul>
         <li v-for='provider in watchlist' :key='provider'>
           <span v-on:click='viewProviderPages(provider)' class='provider-name'>{{provider}}</span>

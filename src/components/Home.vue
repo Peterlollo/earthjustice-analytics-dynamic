@@ -9,9 +9,14 @@
 
 <script>
 import Router from '../router'
-import { mapActions } from 'vuex'
+import { mapActions, mapState } from 'vuex'
 export default {
   name: 'Home',
+  computed: {
+    ...mapState({
+      providers: state => state.report.providers
+    })
+  },
   methods: {
     changeRoute (route) {
       Router.push(route)
@@ -21,7 +26,9 @@ export default {
     ])
   },
   created () {
-    this.getReportData()
+    if (!this.providers.length) { // no provider data in store
+      this.getReportData()
+    }
   }
 }
 </script>

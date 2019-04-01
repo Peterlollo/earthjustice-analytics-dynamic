@@ -26,6 +26,7 @@ module.exports = {
       null
     )
     const org = res.locals.org
+    // TODO; shouldn't this backup check res.locals?
     const path = req.query.path
     const daysAgo = Number(req.query.daysAgo)
     const options = {path, daysAgo, org}
@@ -36,6 +37,7 @@ module.exports = {
   pollData: function (req, res, next) {
     let pageToken = helpers.pageToken
     let reportData = helpers.reportData
-    res.send({pageToken, reportData})
+    let rows = helpers.rows
+    res.send({pageToken, reportData, rows})
   }
 }

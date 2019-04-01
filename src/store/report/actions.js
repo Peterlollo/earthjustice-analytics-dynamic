@@ -58,12 +58,12 @@ const pollReportData = (commit, dispatch, state) => {
       console.log('poll response without filter: ', response)
       if (response.data.pageToken) { // still collecting report data from GA
         let commitMsg = GET_REPORT_DATA_SUCCESS
-        commit(commitMsg, response.data.reportData)
+        commit(commitMsg, response.data.rows)
         dispatch('getPathFromParam')
         setTimeout(function () { pollReportData(commit, dispatch, state) }, 2000)
       } else { // all report data collected from GA
         let commitMsg = GET_REPORT_DATA_SUCCESS
-        commit(commitMsg, response.data.reportData)
+        commit(commitMsg, response.data.rows)
         commit(GET_REPORT_DATA_COMPLETE)
         dispatch('getPathFromParam')
       }

@@ -1,6 +1,5 @@
 const hasPath = (object, path) => {
   if (!object) {
-    console.log('object not defined +++++++++++++++++++++++++++++++++++')
     return false
   }
   let pathWithSlash = `${path}/`
@@ -13,7 +12,6 @@ const hasPath = (object, path) => {
 
 const valAtPath = (object, path) => {
   if (!object) {
-    console.log('object not defined +++++++++++++++++++++++++++++++++++')
     return false
   }
   let pathWithSlash = `${path}/`

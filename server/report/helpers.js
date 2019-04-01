@@ -13,25 +13,28 @@ db.query('SELECT * from whitelist')
     })
   })
   .catch(e => console.error(e))
-// ********* reportData format *********
-// *************************************
-// {
-//   providers: [],
-//   path: '',
-//   providerSessions: {
-// // // 'united states senate': {
-// // // // timesOnPage: [5, 247, 3],
-// // // // paths: ['earthjustice.org', 'earthjustice.org/about']
-// // }
-// }
 
 // ********* helper function: returns keyProvider data to earthjustice *********
 // *****************************************************************************
-const keyProviderData = () => {
+const keyProviderData = (path) => {
   let whiteProviders = whitelist
-  // TODO: +++++++++++++ get an array of all providers here
-  // let reportProviders = module.exports.reportData
-  let reportProviders
+  let rows = module.exports.rows
+  let reportProviders = []
+  let providerSessions = {}
+  for (let i = 0; i < rows.length; i++) {
+    const rowDimensions = rows[i].dimensions
+    const provider = rowDimensions[0]
+    const path = rowDimensions[1]
+    // add providerSessions
+    providerSessions[provider] = providerSessions[provider] || {}
+    providerSessions[provider][path] = true
+    if (reportProviders.indexOf(provider) === -1 && providerSessions[provider][path]) {
+      // provider is not already added
+      // and provider has visited the path that was sent in the request
+      reportProviders.push(provider)
+    }
+  }
+
   let keyProviders = reportProviders.filter((p) => {
     return whiteProviders[p]
   })
@@ -53,6 +56,7 @@ const keyProviderData = () => {
 
 module.exports = {
   pageToken: undefined,
+  rows: [],
   reportData: {},
   authorize: function (jwtClient, request, storeReportData, res, next, options) {
     jwtClient.authorize(function (err, tokens) {
@@ -82,6 +86,7 @@ module.exports = {
       }
       // empty report data objects of old report data
       module.exports.reportData = {}
+      module.exports.rows = []
       // module.exports.reportData.providers = []
       // module.exports.reportData.path = ''
       // module.exports.reportData.providerSessions = {}
@@ -93,8 +98,8 @@ module.exports = {
       if (options.org === 'earthjustice') {
         // only send data if the request was for ej internal use
         // otherwise, the front-end app will poll for data collection
-        let report = keyProviderData()
         let path = res.locals.path
+        let report = keyProviderData(path)
         let daysAgo = res.locals.daysAgo
         res.send({path, daysAgo, report})
       }
@@ -150,41 +155,9 @@ module.exports = {
   },
   // store received GA report inside res.locals
   storeReportData: function (report, res, options) {
-    console.log('report>>>>>', report)
     module.exports.reportData = report
-    // report headers
-    // const dimensions = report.columnHeader.dimensions
-    // const metrics = report.columnHeader.metricHeader.metricHeaderEntries.map((m) => m.name)
-    // indices of variables within rows
-    // const providerIndex = dimensions.indexOf('ga:networkLocation')
-    // const pathIndex = dimensions.indexOf('ga:pagePath')
-    // const timeOnPageIndex = metrics.indexOf('ga:timeOnPage')
-    // const rows = report.data.rows
-
-    // add report data to DB
-    // if (rows) {
-    //   for (let i = 0; i < rows.length; i++) {
-    //     const rowDimensions = rows[i].dimensions
-    //     const provider = rowDimensions[providerIndex]
-    //     const path = rowDimensions[pathIndex]
-    //     const rowMetrics = rows[i].metrics[0].values
-    //     const timeOnPage = Number(rowMetrics[timeOnPageIndex])
-    //     // add providers
-    //     if (module.exports.reportData.providers.indexOf(provider) === -1) {
-    //       module.exports.reportData.providers.push(provider)
-    //     }
-    //     // add path
-    //     if (!module.exports.reportData.path) {
-    //       module.exports.reportData.path = path
-    //     }
-    //     // add providerSessions
-    //     let providerSessions = module.exports.reportData.providerSessions
-    //     providerSessions[provider] = providerSessions[provider] || {}
-    //     providerSessions[provider]['timesOnPage'] = providerSessions[provider]['timesOnPage'] || []
-    //     providerSessions[provider]['timesOnPage'].push(timeOnPage)
-    //     providerSessions[provider]['paths'] = providerSessions[provider]['paths'] || []
-    //     providerSessions[provider]['paths'].push(path)
-    //   }
-    // }
+    if (report.data && report.data.rows) {
+      module.exports.rows = module.exports.rows.concat(report.data.rows)
+    }
   }
 }

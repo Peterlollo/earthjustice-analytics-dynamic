@@ -11,23 +11,13 @@ import {
 } from './types'
 import Vue from 'vue'
 
-// import { getPath } from './actions.js'
-
 const state = {
   error: false,
   fetchingData: false,
   fetchingProviderSessionData: false,
-  report: {},
   providers: [],
   providerSessions: {
-    // '<provider>': {
-    // // '<path>': <total seconds on path>,
-    // }
-    // OLD:
-    // 'united states senate': {
-    // // timesOnPage: [5, 247, 3],
-    // // paths: ['earthjustice.org', 'earthjustice.org/about']
-    // }
+    // <provider>: { <path1>: <total seconds on path1>, <path2>: <total seconds on path2> }
   },
   pathFromParam: '',
   pathFromParamStatus: null,
@@ -49,10 +39,7 @@ const mutations = {
   },
 
   [GET_REPORT_DATA_SUCCESS] (state, report) {
-    console.log('report: ', report)
-    state.report = report
-    let data = report.data
-    let rows = data ? data.rows : []
+    let rows = report
     let providersToAdd = []
     let providerSessionsToAdd = Object.assign({}, state.providerSessions)
     for (let i = 0; i < rows.length; i++) {
@@ -62,7 +49,7 @@ const mutations = {
       const rowMetrics = rows[i].metrics[0].values
       const timeOnPage = Number(rowMetrics[0])
       // add providers
-      if (state.providers.indexOf(provider) === -1) {
+      if (state.providers.indexOf(provider) === -1 && providersToAdd.indexOf(provider) === -1) {
         providersToAdd.push(provider)
       }
       // add providerSessions
@@ -104,18 +91,6 @@ const mutations = {
   [VIEW_PROVIDER_PAGES] (state, provider) {
     state.viewingProviderPagesFor = provider
   }
-
-  // [GET_REPORT_DATA_SUCCESS_WITH_PATH_FILTER] (state, { providers, path, providerSessions }) {
-  //   let urlPath = getPath()
-  //   // TODO: possible that the issue here is that "path" needs a trailing slash?
-  //   if (urlPath === path || `${urlPath}/` === path) { // sometimes GA returns a different earthjustice path that is not what we're searching for
-  //     state.path = path
-  //     state.providersWithPathFilter = providers
-  //     state.providerSessionsWithPathFilter = providerSessions
-  //   }
-  //   state.error = false
-  //   state.fetchingData = false
-  // }
 
 }
 

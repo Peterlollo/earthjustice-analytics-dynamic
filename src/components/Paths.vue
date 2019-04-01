@@ -134,6 +134,10 @@ export default {
     notSchool (sector) {
       return this.schools.indexOf(sector) === -1
     },
+    getPath () {
+      let parsedUrl = new URL(window.location.href)
+      return parsedUrl.searchParams.get('path')
+    },
     ...mapActions([
       'getReportData',
       'getPathFromParam',
@@ -142,16 +146,15 @@ export default {
     ])
   },
   created () {
-    this.getPathFromParam()
-    this.getReportData()
+    let path = this.getPath()
+    if (this.pathFromParam !== path && `${this.pathFromParam}/` !== path) {
+      // path in store is different than current url path
+      this.getReportData()
+      this.getPathFromParam() // put current path into store
+    }
     if (!Object.keys(this.whitelist).length) { // no whitelist data in store
       this.getWhitelistData()
     }
-    // if (!this.path) { // no path data in store
-    //   this.getReportDataWithFilter()
-    // } else {
-    //   this.getPathFromParam()
-    // }
   }
 }
 </script>

@@ -26,7 +26,7 @@
     <div v-show='showUnlistedProviders' class='section no-border-bottom'>
       <div class='list-header'><h2>Unlisted Providers</h2><h2>Whitelist</h2></div>
       <ul>
-        <li v-for='provider in unlistedProviders' :key='provider'>
+        <li v-for='(provider, i) in unlistedProviders' :key='`unlisted-${i}-${provider}`'>
           <div class='provider'>
             <span class='provider-name' v-on:click='viewProviderPages(provider)'>{{provider}}</span>
             <WatchlistStars v-bind:provider='provider'></WatchlistStars>

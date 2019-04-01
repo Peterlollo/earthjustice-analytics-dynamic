@@ -35,7 +35,6 @@ export const providerSessionsWithPathFilter = (state, get) => {
 export const providersWithPathFilter = (state, get) => Object.keys(get.providerSessionsWithPathFilter)
 export const pathFromParam = state => state.report.pathFromParam
 export const pathFromParamStatus = state => state.report.pathFromParamStatus
-export const fetchingPathData = state => state.report.fetchingData
 export const pathError = state => state.report.error
 export const whitelist = state => state.whitelist.whitelist
 export const whitelistSectors = state => state.whitelist.whitelistSectors
@@ -96,7 +95,6 @@ export const sessionsByKeyProvidersWithPathFilter = (state, get) => {
   get.keyProvidersWithPathFilter.map((kp) => {
     result[kp] = get.providerSessionsWithPathFilter[kp]
   })
-  console.log('sessionsByKeyProvidersWithPathFilter>>>>', result)
   return result
 }
 export const keyProvidersBySectorWithPathFilter = (state, get) => {

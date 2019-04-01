@@ -1,5 +1,4 @@
 import {
-  // FETCHING_REPORT_DATA,
   FETCHING_PROVIDER_SESSION_DATA,
   GET_REPORT_DATA_SUCCESS,
   GET_REPORT_DATA_FAILURE,
@@ -27,11 +26,6 @@ const state = {
 }
 
 const mutations = {
-
-  // [FETCHING_REPORT_DATA] (state, bool) {
-  //   state.fetchingData = bool
-  //   state.polling = bool
-  // },
 
   [FETCHING_PROVIDER_SESSION_DATA] (state, bool) {
     state.fetchingProviderSessionData = bool

@@ -87,9 +87,6 @@ module.exports = {
       // empty report data objects of old report data
       module.exports.reportData = {}
       module.exports.rows = []
-      // module.exports.reportData.providers = []
-      // module.exports.reportData.path = ''
-      // module.exports.reportData.providerSessions = {}
       // authorize request
       module.exports.authorize(jwtClient, request, storeReportData, res, next, options)
     } else if (pageToken) { // page token > zero: i.e. there's still data to collect

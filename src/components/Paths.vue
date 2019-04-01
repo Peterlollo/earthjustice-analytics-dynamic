@@ -2,8 +2,7 @@
   <div>
 
     <!-- FETCHING DATA -->
-    <!-- TODO: fetchingPathData not currently being used. Should it? -->
-    <div v-if='fetchingPathData || fetchingWhitelistData' class='section no-border-bottom'>
+    <div v-if='fetchingWhitelistData' class='section no-border-bottom'>
       <h1>Fetching data...</h1>
     </div>
 
@@ -14,17 +13,9 @@
     </div>
 
     <!-- STILL POLLING FOR DATA, NO NETWORK FAILURE, NO PARAM FAILURE, BUT NO PROVIDERS IN STORE -->
-    <!-- <div v-else-if='polling && pathFromParamStatus === "success" && !providers.length' class='section no-border-bottom'>
+    <div v-else-if='polling && pathFromParamStatus === "success" && !providers.length' class='section no-border-bottom'>
       <h1 class='polling'>Data is loading</h1>
-    </div> -->
-
-    <!-- NO NETWORK FAILURE, NO PARAM FAILURE, BUT PATH NOT FOUND IN STORE -->
-    <!-- <div v-else-if='pathFromParamStatus === "success" && !pathFoundInStore' class='section no-border-bottom'>
-      <h1>Sorry, could not find that page path</h1>
-      <p>{{ pathMsgError }}</p>
-      <p>Or, try re-fetching the Google Analytics data</p>
-      <button v-on:click='getReportData' class='btn'>Fetch Data</button>
-    </div> -->
+    </div>
 
     <!-- NO NETWORK FAILURE, BUT FAILURE WITH URL PARAM -->
     <div v-else-if='pathFromParamStatus === "fail"' class='section no-border-bottom'>
@@ -110,7 +101,6 @@ export default {
       'path',
       'pathFromParam',
       'pathFromParamStatus',
-      'fetchingPathData',
       'pathError',
       'whitelist',
       'keyProvidersBySectorWithPathFilter',

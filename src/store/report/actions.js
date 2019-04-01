@@ -1,5 +1,4 @@
 import {
-  // FETCHING_REPORT_DATA,
   FETCHING_PROVIDER_SESSION_DATA,
   GET_REPORT_DATA_SUCCESS,
   GET_REPORT_DATA_FAILURE,
@@ -32,9 +31,6 @@ export const getReportData = ({commit, state, dispatch}) => {
   let daysAgo = state.report.googleAnalyticsDaysAgo
   axios.get(`${process.env.API_BASE_URL}/api/reports/data`, {params: {path, daysAgo}})
     .then(response => {
-      // initial response will likely not contain all data
-      // data can take a while to collect from GA, so we'll poll for it
-      console.log('initial response: ', response)
       setTimeout(function () { pollReportData(commit, dispatch, state) }, 2000)
     })
     .catch(e => {
@@ -55,7 +51,6 @@ export const getPathFromParam = ({commit, dispatch}) => {
 const pollReportData = (commit, dispatch, state) => {
   axios.get(`${process.env.API_BASE_URL}/api/reports/pollData`)
     .then(response => {
-      console.log('poll response without filter: ', response)
       if (response.data.pageToken) { // still collecting report data from GA
         let commitMsg = GET_REPORT_DATA_SUCCESS
         commit(commitMsg, response.data.rows)
